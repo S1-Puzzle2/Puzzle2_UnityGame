@@ -15,9 +15,16 @@ public class GameControllerScript : MonoBehaviour {
 
 	private bool puzzleOver;
 
+	private float time_Team1;
+	private float time_Team2;
+
 	void Start() {
 
 		puzzleOver = false;
+
+		time_Team1 = 0.0f;
+		time_Team2 = 0.0f;
+
 		gridColliders = GameObject.FindGameObjectsWithTag ("GridCollider").OrderBy (go => go.name).ToArray ();
 
 		if (gridColliders.Length < puzzleTextures.Length) {
@@ -37,6 +44,13 @@ public class GameControllerScript : MonoBehaviour {
 				puzzlePieces[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders[i]);
 			}
 		}
+
+	}
+
+	void Update() {
+
+		time_Team1 += Time.deltaTime;
+		time_Team2 += Time.deltaTime;
 
 	}
 
@@ -103,6 +117,25 @@ public class GameControllerScript : MonoBehaviour {
 
 	public bool getPuzzleOver() {
 		return puzzleOver;
+	}
+
+	public void addToTime(int team, float amount) {
+		switch (team) {
+			case 1:
+			time_Team1 += amount;
+			break;
+			case 2:
+			time_Team2 += amount;
+			break;
+		}
+	}
+
+	public float getTime(int team) {
+		if (team == 1) {
+			return time_Team1;
+		}
+
+		return time_Team2;
 	}
 
 
