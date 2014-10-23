@@ -49,7 +49,6 @@
      <Compile Include="Assets\Scripts\GameControllerScript.cs" />
      <Compile Include="Assets\Scripts\GridColliderController.cs" />
      <Compile Include="Assets\Scripts\Networking.cs" />
-     <Compile Include="Assets\Scripts\Rotate.cs" />
      <Compile Include="Assets\Scripts\TileController.cs" />
      <Compile Include="Assets\Scripts\TwoDBoundaries.cs" />
      <Compile Include="Assets\Scripts\UIController.cs" />

@@ -28,9 +28,6 @@ public class TileController : MonoBehaviour {
 	}
 
 	void OnMouseDown() {
-		Vector3 clickPosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		RaycastHit2D[] hits = Physics2D.LinecastAll (clickPosition, clickPosition);
-
 		GameObject hitGameObject = getObjectWithHighestSortingLayer ();
 
 		if (hitGameObject != null) {
@@ -56,9 +53,6 @@ public class TileController : MonoBehaviour {
 	}
 
 	void OnMouseUp() {
-		Vector3 clickPosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-		RaycastHit2D[] hits = Physics2D.LinecastAll (clickPosition, clickPosition);
-
 		GameObject hitGameObject = getObjectWithHighestSortingLayer ();
 
 		if (hitGameObject != null) {
@@ -85,6 +79,7 @@ public class TileController : MonoBehaviour {
 	}
 
 	GameObject getObjectWithHighestSortingLayer() {
+
 		Vector3 clickPosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
 		RaycastHit2D[] hits = Physics2D.LinecastAll (clickPosition, clickPosition);
 		GameObject selectedObject = null;
@@ -107,9 +102,10 @@ public class TileController : MonoBehaviour {
 
 	private void setCurrentGridCollider(GameObject collider) {
 		this.currentGridCollider = collider;
-		Debug.Log (collider);
 		if (this.currentGridCollider != null) {
 			audio.Play();
 		}
 	}
+	
 }
+

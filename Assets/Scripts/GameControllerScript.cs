@@ -17,7 +17,7 @@ public class GameControllerScript : MonoBehaviour {
 
 	private float time_Team1;
 	private float time_Team2;
-
+	
 	void Start() {
 
 		puzzleOver = false;
@@ -32,9 +32,10 @@ public class GameControllerScript : MonoBehaviour {
 			Debug.LogError("Not enough grid colliders in the scene");
 		}
 
+
 		puzzlePieces = new GameObject[puzzleTextures.Length];
 		for(int i = 0; i < puzzleTextures.Length; i++) {
-
+	
 			Vector3 createdPos = new Vector3(Random.Range(boundaries.minX, boundaries.maxX), Random.Range(boundaries.minY, boundaries.maxY), 0.0f); 
 			puzzlePieces[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
 			puzzlePieces[i].GetComponent<SpriteRenderer>().sprite = puzzleTextures[i];
