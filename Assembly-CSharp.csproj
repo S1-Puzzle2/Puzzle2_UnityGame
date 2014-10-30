@@ -48,12 +48,23 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\GameControllerScript.cs" />
      <Compile Include="Assets\Scripts\GridColliderController.cs" />
-     <Compile Include="Assets\Scripts\Networking.cs" />
+     <Compile Include="Assets\Scripts\NetworkController.cs" />
+     <Compile Include="Assets\Scripts\Networking\Classes\ConnectionDelegates.cs" />
+     <Compile Include="Assets\Scripts\Networking\Classes\ConnectionManager.cs" />
+     <Compile Include="Assets\Scripts\Networking\Classes\TransferObject.cs" />
+     <Compile Include="Assets\Scripts\Networking\Classes\WLANConnection.cs" />
+     <Compile Include="Assets\Scripts\Networking\Classes\WLANConnectionDef.cs" />
+     <Compile Include="Assets\Scripts\Networking\Interfaces\IConnection.cs" />
+     <Compile Include="Assets\Scripts\Networking\Interfaces\IConnectionDef.cs" />
      <Compile Include="Assets\Scripts\TileController.cs" />
      <Compile Include="Assets\Scripts\TwoDBoundaries.cs" />
      <Compile Include="Assets\Scripts\UIController.cs" />
+     <Compile Include="Assets\Scripts\Webcam.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.0/UnityEngine.UI.dll</HintPath>
+ </Reference>
+ <Reference Include="LitJson">
+ <HintPath>C:/Users/faisstm/Documents/Puzzle2/Assets/LitJson.dll</HintPath>
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

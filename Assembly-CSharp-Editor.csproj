@@ -5,11 +5,11 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{1E1DE654-EF14-51C2-7988-1E8B545FB342}</ProjectGuid>
+	<ProjectGuid>{9137F4BD-9E93-5C4C-6481-37260C4DF161}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
-	<AssemblyName>Assembly-CSharp</AssemblyName>
+	<AssemblyName>Assembly-CSharp-Editor</AssemblyName>
 	<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
 	<FileAlignment>512</FileAlignment>
 	<BaseDirectory>Assets</BaseDirectory>
@@ -46,26 +46,27 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\GameControllerScript.cs" />
-     <Compile Include="Assets\Scripts\GridColliderController.cs" />
-     <Compile Include="Assets\Scripts\NetworkController.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\ConnectionDelegates.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\ConnectionManager.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\TransferObject.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\WLANConnection.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\WLANConnectionDef.cs" />
-     <Compile Include="Assets\Scripts\Networking\Interfaces\IConnection.cs" />
-     <Compile Include="Assets\Scripts\Networking\Interfaces\IConnectionDef.cs" />
-     <Compile Include="Assets\Scripts\TileController.cs" />
-     <Compile Include="Assets\Scripts\TwoDBoundaries.cs" />
-     <Compile Include="Assets\Scripts\UIController.cs" />
-     <Compile Include="Assets\Scripts\Webcam.cs" />
+     <Compile Include="Assets\JSON\Editor\JSONChecker.cs" />
+     <None Include="Assets\JSON\readme.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.0/UnityEngine.UI.dll</HintPath>
  </Reference>
- <Reference Include="LitJson">
- <HintPath>C:/Users/faisstm/Documents/Puzzle2/Assets/LitJson.dll</HintPath>
+ <Reference Include="UnityEditor.UI">
+ <HintPath>C:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.0/Editor/UnityEditor.UI.dll</HintPath>
  </Reference>
+ <Reference Include="UnityEditor.Graphs">
+ <HintPath>C:/Program Files (x86)/Unity/Editor/Data/Managed/UnityEditor.Graphs.dll</HintPath>
+ </Reference>
+ <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
+ <HintPath>C:/Users/faisstm/Documents/Puzzle2/Assets/UnityVS/Editor/SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
+ </Reference>
+ <Reference Include="SyntaxTree.VisualStudio.Unity.Messaging">
+ <HintPath>C:/Users/faisstm/Documents/Puzzle2/Assets/UnityVS/Editor/SyntaxTree.VisualStudio.Unity.Messaging.dll</HintPath>
+ </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp.csproj">
+      <Project>{1E1DE654-EF14-51C2-7988-1E8B545FB342}</Project>      <Name>Assembly-CSharp</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
