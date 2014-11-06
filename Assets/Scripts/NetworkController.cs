@@ -6,11 +6,16 @@ using System.Collections.Generic;
 
 public class NetworkController : MonoBehaviour {
 
-	ConnectionManager connManager;
+	public string ip;
+	public int port;
+	
+	private ConnectionManager connManager;
+	private bool connected;
 
 	// Use this for initialization
 	void Start () {
 		
+		connected = false;
 		connManager = new ConnectionManager();
 		
 		Thread thread = new Thread(openConn);
@@ -18,21 +23,27 @@ public class NetworkController : MonoBehaviour {
 	}
 	
 	private void openConn() {
-		connManager.open(ClientType.Unity, ConnectionType.WLAN, new WLANConnectionDef("172.16.50.73", 4711), new ConnectionDelegates.ConnectedHandler(connectedCallback));
-		
-		string[] testArray = new string[3];
-		testArray[0] = "Hallo";
-		testArray[1] = "ihr";
-		testArray[2] = "Idioten";
-		
-		TransferObject testObj = new TransferObject(Command.testCommand, testArray);
+		connManager.open(ClientType.Unity, ConnectionType.WLAN, new WLANConnectionDef(ip, port), new ConnectionDelegates.ConnectedHandler(connectedCallback));
+	}
+	
+	private void sendConn(TransferObject obj) {
+		connManager.send(obj, new ConnectionDelegates.SentHandler(sentCallback));
+	}
+	
+	private void closeConn() {
+		connManager.close();
 	}
 	
 	private void connectedCallback() {
+		connected = true;
 		Debug.Log("Connection succesfull");
 	}
 	
 	private void sentCallback() {
 		Debug.Log("Sent message");
+	}
+	
+	private void receiveCallback(string response) {
+		Debug.Log(response);
 	}
 }

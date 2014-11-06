@@ -15,6 +15,13 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 		get; private set;
 	}
 	
+	public class StateObject {
+		public Socket workSocket = null;
+		public const int bufferSize = 256;
+		public byte[] buffer = new byte[bufferSize];
+		public StringBuilder sb = new StringBuilder();
+	}
+	
 	private ManualResetEvent connected = new ManualResetEvent(false);
 	private ManualResetEvent sent = new ManualResetEvent(false);
 	private ManualResetEvent received = new ManualResetEvent(false);
@@ -31,15 +38,23 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 		
 		OnConnected();	
 	}
+	
+	private void OnConnectCallback(IAsyncResult result) {
+		Socket server = (Socket)result.AsyncState;
+		server.EndConnect(result);
+		connected.Set();
+	}
 
 	public void close() {
+		socket.Shutdown(SocketShutdown.Both);
+		socket.Close();
 	}
 	
 	public void send(TransferObject obj, ConnectionDelegates.SentHandler callback) {
 		if(socket.Connected) {	
 		
 			Sent += callback;
-			String jsonString = JsonMapper.ToJson(obj);
+			String jsonString = JsonMapper.ToJson(obj) + "\n";
 			byte[] jsonBA = Encoding.UTF8.GetBytes(jsonString);
 			Debug.Log(jsonString);
 			socket.BeginSend(jsonBA, 0, jsonBA.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
@@ -47,18 +62,39 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	}
 	
 	private void SendCallback(IAsyncResult result) {
-		Socket resceiver = (Socket)result.AsyncState;
-		resceiver.EndSend(result);
+		Socket receiver = (Socket)result.AsyncState;
+		receiver.EndSend(result);
+		socket.EndSend(result);
 		sent.Set();
 		OnSent();
 	}
-
-	private void OnConnectCallback(IAsyncResult result) {
-		Socket server = (Socket)result.AsyncState;
-		server.EndConnect(result);
-		connected.Set();
-
+	
+	public void receive(Socket client) {
+		StateObject state = new StateObject();
+		state.workSocket = client;
+		client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
 	}
+	
+	private void receiveCallback(IAsyncResult result) {
+		StateObject state = (StateObject) result.AsyncState;
+		Socket client = state.workSocket;
+		
+		int bytesRead = client.EndReceive(result);
+		if(bytesRead > 0) {
+			state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+			client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+		} else {
+			string response = null;
+			if(state.sb.Length > 1) {
+				response = state.sb.ToString();
+			}
+			
+			OnReceived(response);
+			received.Set();
+		}
+	}
+
+
 
 
 }

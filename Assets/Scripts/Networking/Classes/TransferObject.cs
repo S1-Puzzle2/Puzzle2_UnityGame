@@ -7,6 +7,10 @@ public enum Command {
 
 public class TransferObject {
 
+	public int SenderID {
+		get; private set;
+	}
+
 	public Command Command {
 		get; private set;
 	}
@@ -15,9 +19,10 @@ public class TransferObject {
 		get; private set;
 	}
 	
-	public TransferObject(Command command, System.Object data) {
+	public TransferObject(Command command, System.Object data, int senderID) {
 		this.Command = command;
 		this.Data = data;
+		this.SenderID = senderID;
 	}
 
 
