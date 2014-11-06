@@ -13,5 +13,6 @@ public interface IConnection {
 	void close();
 
 	void send(TransferObject obj, ConnectionDelegates.SentHandler callback);
+	void receive(ConnectionDelegates.ReceivedHandler callback);
 
 }

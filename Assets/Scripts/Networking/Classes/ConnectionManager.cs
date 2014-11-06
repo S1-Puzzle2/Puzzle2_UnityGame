@@ -35,5 +35,9 @@ public class ConnectionManager : IConnection {
 	public void send(TransferObject obj, ConnectionDelegates.SentHandler callback) {
 		currConn.send (obj, callback);
 	}
+	
+	public void receive(ConnectionDelegates.ReceivedHandler callback) {
+		currConn.receive(callback);
+	}
 
 }

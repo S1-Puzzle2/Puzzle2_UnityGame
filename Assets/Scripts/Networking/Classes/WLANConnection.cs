@@ -69,10 +69,12 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 		OnSent();
 	}
 	
-	public void receive(Socket client) {
+	public void receive(ConnectionDelegates.ReceivedHandler callback) {
+		Debug.Log("start receiving");
+		Received += callback;
 		StateObject state = new StateObject();
-		state.workSocket = client;
-		client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+		state.workSocket = socket;
+		socket.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
 	}
 	
 	private void receiveCallback(IAsyncResult result) {
@@ -80,10 +82,8 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 		Socket client = state.workSocket;
 		
 		int bytesRead = client.EndReceive(result);
-		if(bytesRead > 0) {
+		if(bytesRead < StateObject.bufferSize || bytesRead == 0) {
 			state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-			client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
-		} else {
 			string response = null;
 			if(state.sb.Length > 1) {
 				response = state.sb.ToString();
@@ -91,7 +91,15 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 			
 			OnReceived(response);
 			received.Set();
+			state = new StateObject();
+			state.workSocket = socket;
+			
+		} else {
+			state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
 		}
+		
+		client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+		
 	}
 
 

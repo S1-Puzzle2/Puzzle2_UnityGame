@@ -24,10 +24,16 @@ public class NetworkController : MonoBehaviour {
 	
 	private void openConn() {
 		connManager.open(ClientType.Unity, ConnectionType.WLAN, new WLANConnectionDef(ip, port), new ConnectionDelegates.ConnectedHandler(connectedCallback));
+		connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
 	}
 	
 	private void sendConn(TransferObject obj) {
 		connManager.send(obj, new ConnectionDelegates.SentHandler(sentCallback));
+	}
+	
+	public void testSend() {
+		TransferObject obj = new TransferObject(Command.testCommand, "asdf", 47);
+		sendConn(obj);
 	}
 	
 	private void closeConn() {
