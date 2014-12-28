@@ -9,14 +9,13 @@ public class ServerSelectController : MonoBehaviour {
     public GameObject listEntry;
     public int yOffset = 30;
     public InputField ipInput;
+    public NetworkController networkController;
 
     private LinkedList<GameObject> entries;
-    private Animator animator;
 
 	// Use this for initialization
 	void Start () {
         entries = new LinkedList<GameObject>();
-        animator = GetComponent<Animator>();
 	}
 	
 	// Update is called once per frame
@@ -38,6 +37,9 @@ public class ServerSelectController : MonoBehaviour {
     public void connect()
     {
         string ip = ipInput.text.text;
-        animator.SetTrigger("serverSelected");
+        this.gameObject.SetActive(false);
+
+        networkController.ip = ip;
+        networkController.openConn();
     }
 }

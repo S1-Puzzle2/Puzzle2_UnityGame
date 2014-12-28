@@ -27,6 +27,9 @@ public abstract class AbstractTransferObject {
         writer.WritePropertyName("appMsg");
         writer.WriteObjectStart();
 
+        writer.WritePropertyName("playerID");
+        writer.Write("Unity");
+
         writer.WritePropertyName("msgType");
         writer.Write((int)msgType);
     }

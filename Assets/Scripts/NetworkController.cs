@@ -13,7 +13,9 @@ public class NetworkController : MonoBehaviour {
 
     public string broadcastIP;
     public int broadcastPort;
-	
+
+    public GameControllerScript gameController;
+
 	private ConnectionManager connManager;
 	private bool connected;
 
@@ -39,40 +41,46 @@ public class NetworkController : MonoBehaviour {
         closeConn();
     }
 
-    private void broadcastOpen()
+    public void broadcastOpen()
     {
         connManager.open(ClientType.Unity, ConnectionType.Broadcast, new WLANConnectionDef(broadcastIP, broadcastPort), new ConnectionDelegates.ConnectedHandler(connectedCallback));
     }
 
-    private void broadcastSend()
+    public void broadcastSend()
     {
         SimpleParameterTransferObject spto = new SimpleParameterTransferObject(Command.AreYouThere, null);
         Debug.Log(spto.toJson());
         connManager.send(spto, new ConnectionDelegates.SentHandler(sentCallback));
     }
 
-    private void broadcastReceive()
+    public void broadcastReceive()
     {
         connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
     }
 
-	private void openConn() {
-        connManager.open(ClientType.Unity, ConnectionType.WLAN, new WLANConnectionDef(ip, broadcastPort), new ConnectionDelegates.ConnectedHandler(connectedCallback));
+    public void openConn()
+    {
+        connManager.open(ClientType.Unity, ConnectionType.WLAN, new WLANConnectionDef(ip, port), new ConnectionDelegates.ConnectedHandler(connectedCallback));
 		connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
 	}
-	
-	private void sendConn(AbstractTransferObject obj) {
+
+    public void sendConn(AbstractTransferObject obj)
+    {
 		connManager.send(obj, new ConnectionDelegates.SentHandler(sentCallback));
 	}
-	
-	
-	private void closeConn() {
+
+
+    public void closeConn()
+    {
 		connManager.close();
 	}
 	
 	private void connectedCallback() {
 		connected = true;
-		Debug.Log("Connection succesfull");
+        Debug.Log("connected");
+        SimpleParameterTransferObject registerPackage = new SimpleParameterTransferObject(Command.Register, null);
+        sendConn(registerPackage);
+
 	}
 	
 	private void sentCallback() {
@@ -80,6 +88,8 @@ public class NetworkController : MonoBehaviour {
 	}
 	
 	private void receiveCallback(string response) {
-		Debug.Log("Response: " + response);
+
+        JsonData responseData = JsonMapper.ToObject(response);
+        
 	}
 }

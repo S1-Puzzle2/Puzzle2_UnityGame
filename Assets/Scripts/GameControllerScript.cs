@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Linq;
+using LitJson;
 
 public class GameControllerScript : MonoBehaviour {
 
@@ -148,6 +149,26 @@ public class GameControllerScript : MonoBehaviour {
 
 		return time_Team2;
 	}
+
+    public void updateFromNetwork(JsonData data)
+    {
+        int cmdId = (int)data["appMsg"]["msgType"];
+        Command cmd = (Command) cmdId;
+
+        switch (cmd)
+        {
+            case Command.Pause:
+                break;
+            case Command.QrCodeSend:
+                break;
+            case Command.PenaltyTimeAdd:
+                break;
+            case Command.GameDataSend:
+                break;
+            case Command.PieceScanned:
+                break;
+        }
+    }
 
 
 }
