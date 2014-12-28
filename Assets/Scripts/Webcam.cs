@@ -3,6 +3,9 @@ using System.Collections;
 
 public class Webcam : MonoBehaviour {
 
+	public Shader shader;
+	public float brightness = 1.0f;
+
 	private WebCamTexture webcamTexture;
 
 	// Use this for initialization

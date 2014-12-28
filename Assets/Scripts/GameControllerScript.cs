@@ -13,6 +13,8 @@ public class GameControllerScript : MonoBehaviour {
 	private GameObject[] gridColliders;
 	private bool notEnoughColliders;
 
+    private bool started;
+
 	private bool puzzleOver;
 
 	private float time_Team1;
@@ -20,38 +22,46 @@ public class GameControllerScript : MonoBehaviour {
 	
 	void Start() {
 
+        started = false;
 		puzzleOver = false;
 
 		time_Team1 = 0.0f;
 		time_Team2 = 0.0f;
-
-		gridColliders = GameObject.FindGameObjectsWithTag ("GridCollider").OrderBy (go => go.name).ToArray ();
-
-		if (gridColliders.Length < puzzleTextures.Length) {
-			notEnoughColliders = true;
-			Debug.LogError("Not enough grid colliders in the scene");
-		}
-
-
-		puzzlePieces = new GameObject[puzzleTextures.Length];
-		for(int i = 0; i < puzzleTextures.Length; i++) {
-	
-			Vector3 createdPos = new Vector3(Random.Range(boundaries.minX, boundaries.maxX), Random.Range(boundaries.minY, boundaries.maxY), 0.0f); 
-			puzzlePieces[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
-			puzzlePieces[i].GetComponent<SpriteRenderer>().sprite = puzzleTextures[i];
-			puzzlePieces[i].renderer.sortingOrder = i;
-
-			if(!notEnoughColliders) {
-				puzzlePieces[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders[i]);
-			}
-		}
-
 	}
+
+    public void startGame()
+    {
+        gridColliders = GameObject.FindGameObjectsWithTag("GridCollider").OrderBy(go => go.name).ToArray();
+
+        if (gridColliders.Length < puzzleTextures.Length)
+        {
+            notEnoughColliders = true;
+            Debug.LogError("Not enough grid colliders in the scene");
+        }
+
+        puzzlePieces = new GameObject[puzzleTextures.Length];
+        for (int i = 0; i < puzzleTextures.Length; i++)
+        {
+
+            Vector3 createdPos = new Vector3(Random.Range(boundaries.minX, boundaries.maxX), Random.Range(boundaries.minY, boundaries.maxY), 0.0f);
+            puzzlePieces[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
+            puzzlePieces[i].GetComponent<SpriteRenderer>().sprite = puzzleTextures[i];
+            puzzlePieces[i].renderer.sortingOrder = i;
+
+            if (!notEnoughColliders)
+            {
+                puzzlePieces[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders[i]);
+            }
+        }
+    }
 
 	void Update() {
 
-		time_Team1 += Time.deltaTime;
-		time_Team2 += Time.deltaTime;
+        if (started)
+        {
+            time_Team1 += Time.deltaTime;
+            time_Team2 += Time.deltaTime;
+        }
 
 	}
 

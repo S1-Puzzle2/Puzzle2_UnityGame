@@ -50,11 +50,11 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 		socket.Close();
 	}
 	
-	public void send(TransferObject obj, ConnectionDelegates.SentHandler callback) {
+	public void send(AbstractTransferObject obj, ConnectionDelegates.SentHandler callback) {
 		if(socket.Connected) {	
 		
 			Sent += callback;
-			String jsonString = JsonMapper.ToJson(obj) + "\n";
+			String jsonString = obj.toJson() + "\n";
 			byte[] jsonBA = Encoding.UTF8.GetBytes(jsonString);
 			Debug.Log(jsonString);
 			socket.BeginSend(jsonBA, 0, jsonBA.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);

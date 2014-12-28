@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 public enum ConnectionType {
 	WLAN,
-	Bluetooth
+	Bluetooth,
+    Broadcast
 }
 
 public class ConnectionManager : IConnection {
@@ -23,6 +24,10 @@ public class ConnectionManager : IConnection {
 			// bluetooth connection
 			break;
 
+       case ConnectionType.Broadcast:
+            currConn = new BroadcastConnection();
+            currConn.open(clientType, connType, def, callback);
+            break;
 		default:
 			break;
 		}
@@ -32,7 +37,7 @@ public class ConnectionManager : IConnection {
 		currConn.close ();
 	}
 	
-	public void send(TransferObject obj, ConnectionDelegates.SentHandler callback) {
+	public void send(AbstractTransferObject obj, ConnectionDelegates.SentHandler callback) {
 		currConn.send (obj, callback);
 	}
 	

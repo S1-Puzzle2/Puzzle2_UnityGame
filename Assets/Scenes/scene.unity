@@ -1102,6 +1102,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ip: 172.16.50.247
   port: 4712
+  broadcastIP: 
+  broadcastPort: 0
 --- !u!4 &1373957589
 Transform:
   m_ObjectHideFlags: 0
