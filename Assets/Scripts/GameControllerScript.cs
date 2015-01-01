@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Linq;
 using LitJson;
+using ZXing;
+using System.Collections.Generic;
+using ZXing.QrCode;
 
 public class GameControllerScript : MonoBehaviour {
 
@@ -9,6 +12,8 @@ public class GameControllerScript : MonoBehaviour {
 	public GameObject puzzlePiecePrefab;
 	public TwoDBoundaries boundaries;
 	public float snapDistance;
+
+    public QRCodePanel qrCodePanel;
 
 	private GameObject[] puzzlePieces;
 	private GameObject[] gridColliders;
@@ -20,6 +25,15 @@ public class GameControllerScript : MonoBehaviour {
 
 	private float time_Team1;
 	private float time_Team2;
+
+    private BarcodeWriter qrWriter;
+
+    private bool commandReceived = false;
+    private Command receivedCommand;
+    private JsonData data;
+
+    public bool paused = false;
+    
 	
 	void Start() {
 
@@ -28,6 +42,9 @@ public class GameControllerScript : MonoBehaviour {
 
 		time_Team1 = 0.0f;
 		time_Team2 = 0.0f;
+
+        qrWriter = new BarcodeWriter { Format = BarcodeFormat.QR_CODE, Options = new QrCodeEncodingOptions { Height = 256, Width = 256 } };
+        qrCodePanel.disablePanel();
 	}
 
     public void startGame()
@@ -39,20 +56,25 @@ public class GameControllerScript : MonoBehaviour {
             notEnoughColliders = true;
             Debug.LogError("Not enough grid colliders in the scene");
         }
-
-        puzzlePieces = new GameObject[puzzleTextures.Length];
-        for (int i = 0; i < puzzleTextures.Length; i++)
+        else
         {
 
-            Vector3 createdPos = new Vector3(Random.Range(boundaries.minX, boundaries.maxX), Random.Range(boundaries.minY, boundaries.maxY), 0.0f);
-            puzzlePieces[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
-            puzzlePieces[i].GetComponent<SpriteRenderer>().sprite = puzzleTextures[i];
-            puzzlePieces[i].renderer.sortingOrder = i;
-
-            if (!notEnoughColliders)
+            puzzlePieces = new GameObject[puzzleTextures.Length];
+            for (int i = 0; i < puzzleTextures.Length; i++)
             {
-                puzzlePieces[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders[i]);
+
+                Vector3 createdPos = new Vector3(Random.Range(boundaries.minX, boundaries.maxX), Random.Range(boundaries.minY, boundaries.maxY), 0.0f);
+                puzzlePieces[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
+                puzzlePieces[i].GetComponent<SpriteRenderer>().sprite = puzzleTextures[i];
+                puzzlePieces[i].renderer.sortingOrder = i;
+
+                if (!notEnoughColliders)
+                {
+                    puzzlePieces[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders[i]);
+                }
             }
+
+            started = true;
         }
     }
 
@@ -62,6 +84,51 @@ public class GameControllerScript : MonoBehaviour {
         {
             time_Team1 += Time.deltaTime;
             time_Team2 += Time.deltaTime;
+        }
+
+        if (commandReceived)
+        {
+            Debug.Log("Command received! BAM");
+            string dataNull = data == null ? "yes : (" : "No";
+            Debug.Log("Is data null?" + dataNull);
+
+            int cmdId = (int)data["appMsg"]["msgType"];
+            receivedCommand = (Command)cmdId;
+            
+            switch (receivedCommand)
+            {
+                case Command.QrCodeSend:
+                    qrCodePanel.enablePanel();
+
+                    string uid1 = (string) data["appMsg"]["msgData"]["uid1"];
+                    string uid2 = (string) data["appMsg"]["msgData"]["uid2"];
+
+                    Debug.Log("QR Contents: " + uid1 + " / " + uid2);
+
+                    Color32[] qr1 = qrWriter.Write(uid1);
+                    Color32[] qr2 = qrWriter.Write(uid2);
+
+                    qrCodePanel.setQRCodes(qr1, qr2);
+                    break;
+                case Command.GameDataSend:
+                    //TODO: write
+                    break;
+                case Command.Pause:
+                    Time.timeScale = 0;
+                    paused = true;
+                    break;
+                case Command.Ready:
+                    startGame();
+                    break;
+                case Command.PenaltyTimeAdd:
+                    //TODO: write
+                    break;
+                case Command.PieceScanned:
+                    //TODO: write
+                    break;
+            }
+
+            commandReceived = false;
         }
 
 	}
@@ -152,14 +219,25 @@ public class GameControllerScript : MonoBehaviour {
 
     public void updateFromNetwork(JsonData data)
     {
-        int cmdId = (int)data["appMsg"]["msgType"];
-        Command cmd = (Command) cmdId;
+        this.data = data;
+        commandReceived = true;
+        /*
 
-        switch (cmd)
+        Debug.Log("Received Command: " + receivedCommand);
+
+        switch (receivedCommand)
         {
             case Command.Pause:
                 break;
             case Command.QrCodeSend:
+                
+                string uid1 = (string) data["appMsg"]["msgData"]["uid1"];
+                string uid2 = (string) data["appMsg"]["msgData"]["uid2"];
+
+                Color32[] qr1 = qrWriter.Write(uid1);
+                Color32[] qr2 = qrWriter.Write(uid2);
+
+                commandArgs = new System.Object[] { qr1, qr2 };
                 break;
             case Command.PenaltyTimeAdd:
                 break;
@@ -168,6 +246,9 @@ public class GameControllerScript : MonoBehaviour {
             case Command.PieceScanned:
                 break;
         }
+
+        commandReceived = true;
+         * */
     }
 
 

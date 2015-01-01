@@ -60,9 +60,15 @@ public class NetworkController : MonoBehaviour {
 
     public void openConn()
     {
-        connManager.open(ClientType.Unity, ConnectionType.WLAN, new WLANConnectionDef(ip, port), new ConnectionDelegates.ConnectedHandler(connectedCallback));
-		connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
+        Thread openConnThread = new Thread(openConnHelper);
+        openConnThread.Start();
 	}
+
+    private void openConnHelper()
+    {
+        connManager.open(ClientType.Unity, ConnectionType.WLAN, new WLANConnectionDef(ip, port), new ConnectionDelegates.ConnectedHandler(connectedCallback));
+        connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
+    }
 
     public void sendConn(AbstractTransferObject obj)
     {
@@ -89,7 +95,10 @@ public class NetworkController : MonoBehaviour {
 	
 	private void receiveCallback(string response) {
 
+        Debug.Log("received: " + response); 
         JsonData responseData = JsonMapper.ToObject(response);
-        
+
+        gameController.updateFromNetwork(responseData);
+        connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
 	}
 }

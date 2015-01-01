@@ -5,11 +5,11 @@
 	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 	<ProductVersion>10.0.20506</ProductVersion>
 	<SchemaVersion>2.0</SchemaVersion>
-	<ProjectGuid>{1E1DE654-EF14-51C2-7988-1E8B545FB342}</ProjectGuid>
+	<ProjectGuid>{24275D04-928D-19ED-A480-327911EBB4B0}</ProjectGuid>
 	<OutputType>Library</OutputType>
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
-	<AssemblyName>Assembly-CSharp</AssemblyName>
+	<AssemblyName>Assembly-Boo</AssemblyName>
 	<TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
 	<FileAlignment>512</FileAlignment>
 	<BaseDirectory>Assets</BaseDirectory>
@@ -46,26 +46,7 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\GameControllerScript.cs" />
-     <Compile Include="Assets\Scripts\GridColliderController.cs" />
-     <Compile Include="Assets\Scripts\NetworkController.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\BroadcastConnection.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\ConnectionDelegates.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\ConnectionManager.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\WLANConnection.cs" />
-     <Compile Include="Assets\Scripts\Networking\Classes\WLANConnectionDef.cs" />
-     <Compile Include="Assets\Scripts\Networking\Enum\ClientType.cs" />
-     <Compile Include="Assets\Scripts\Networking\Enum\Command.cs" />
-     <Compile Include="Assets\Scripts\Networking\Interfaces\IConnection.cs" />
-     <Compile Include="Assets\Scripts\Networking\Interfaces\IConnectionDef.cs" />
-     <Compile Include="Assets\Scripts\Networking\TransferObjects\AbstractTransferObject.cs" />
-     <Compile Include="Assets\Scripts\Networking\TransferObjects\SimpleParameterTransferObject.cs" />
-     <Compile Include="Assets\Scripts\QRCodePanel.cs" />
-     <Compile Include="Assets\Scripts\ServerSelectController.cs" />
-     <Compile Include="Assets\Scripts\TileController.cs" />
-     <Compile Include="Assets\Scripts\TwoDBoundaries.cs" />
-     <Compile Include="Assets\Scripts\UIController.cs" />
-     <Compile Include="Assets\Scripts\Webcam.cs" />
+     <Compile Include="Assets\Scripts\NewBehaviourScript.boo" />
      <None Include="Assets\zxing.unity.xml" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.0/UnityEngine.UI.dll</HintPath>

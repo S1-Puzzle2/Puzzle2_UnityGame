@@ -17,7 +17,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	
 	public class StateObject {
 		public Socket workSocket = null;
-		public const int bufferSize = 256;
+		public const int bufferSize = 1024;
 		public byte[] buffer = new byte[bufferSize];
 		public StringBuilder sb = new StringBuilder();
 	}
@@ -33,6 +33,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 		IPEndPoint endPoint = new IPEndPoint (IPAddress.Parse (wlanDef.Ip), wlanDef.Port);
 
 		socket = new Socket (AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        
 		socket.BeginConnect (endPoint, new System.AsyncCallback (OnConnectCallback), socket);		
 		connected.WaitOne ();
 		
@@ -80,7 +81,26 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	private void receiveCallback(IAsyncResult result) {
 		StateObject state = (StateObject) result.AsyncState;
 		Socket client = state.workSocket;
-		
+        string response = "";
+
+        int bytesRead = client.EndReceive(result);
+
+        if (bytesRead > 0)
+        {
+            state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+            client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+        }
+        else
+        {
+            if (state.sb.Length > 1)
+            {
+                response = state.sb.ToString();
+                received.Set();
+                OnReceived(response);
+            }
+        }
+
+        /*
 		int bytesRead = client.EndReceive(result);
 		if(bytesRead < StateObject.bufferSize || bytesRead == 0) {
 			state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
@@ -99,10 +119,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 		}
 		
 		client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
-		
+         * */
 	}
-
-
-
 
 }

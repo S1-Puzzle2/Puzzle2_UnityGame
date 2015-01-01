@@ -60,16 +60,21 @@
      <Compile Include="Assets\Scripts\Networking\Interfaces\IConnectionDef.cs" />
      <Compile Include="Assets\Scripts\Networking\TransferObjects\AbstractTransferObject.cs" />
      <Compile Include="Assets\Scripts\Networking\TransferObjects\SimpleParameterTransferObject.cs" />
+     <Compile Include="Assets\Scripts\QRCodePanel.cs" />
      <Compile Include="Assets\Scripts\ServerSelectController.cs" />
      <Compile Include="Assets\Scripts\TileController.cs" />
      <Compile Include="Assets\Scripts\TwoDBoundaries.cs" />
      <Compile Include="Assets\Scripts\UIController.cs" />
      <Compile Include="Assets\Scripts\Webcam.cs" />
+     <None Include="Assets\zxing.unity.xml" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/4.6.0/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="LitJson">
  <HintPath>C:/Users/faisstm/Documents/Puzzle2/Assets/LitJson.dll</HintPath>
+ </Reference>
+ <Reference Include="zxing.unity">
+ <HintPath>C:/Users/faisstm/Documents/Puzzle2/Assets/zxing.unity.dll</HintPath>
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
