@@ -88,7 +88,17 @@ public class WLANConnection : ConnectionDelegates, IConnection {
         if (bytesRead > 0)
         {
             state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-            client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+            if (state.sb.ToString().Contains("\0"))
+            {
+                response = state.sb.ToString();
+                received.Set();
+                OnReceived(response);
+            }
+            else
+            {
+                client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+            }
+
         }
         else
         {

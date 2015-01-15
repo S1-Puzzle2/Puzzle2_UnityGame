@@ -55,6 +55,9 @@
     <Reference Include="LitJson">
       <HintPath>Assets\LitJson.dll</HintPath>
     </Reference>
+    <Reference Include="Pathfinding.JsonFx">
+      <HintPath>Assets\Plugins\Pathfinding.JsonFx.dll</HintPath>
+    </Reference>
     <Reference Include="zxing.unity">
       <HintPath>Assets\zxing.unity.dll</HintPath>
     </Reference>
@@ -63,9 +66,11 @@
     <Compile Include="Assets\Scripts\GameControllerScript.cs" />
     <Compile Include="Assets\Scripts\GridColliderController.cs" />
     <Compile Include="Assets\Scripts\NetworkController.cs" />
+    <Compile Include="Assets\Scripts\Networking\Classes\Base64.cs" />
     <Compile Include="Assets\Scripts\Networking\Classes\BroadcastConnection.cs" />
     <Compile Include="Assets\Scripts\Networking\Classes\ConnectionDelegates.cs" />
     <Compile Include="Assets\Scripts\Networking\Classes\ConnectionManager.cs" />
+    <Compile Include="Assets\Scripts\Networking\Classes\Crc32.cs" />
     <Compile Include="Assets\Scripts\Networking\Classes\WLANConnection.cs" />
     <Compile Include="Assets\Scripts\Networking\Classes\WLANConnectionDef.cs" />
     <Compile Include="Assets\Scripts\Networking\Enum\ClientType.cs" />
@@ -73,6 +78,7 @@
     <Compile Include="Assets\Scripts\Networking\Interfaces\IConnection.cs" />
     <Compile Include="Assets\Scripts\Networking\Interfaces\IConnectionDef.cs" />
     <Compile Include="Assets\Scripts\Networking\TransferObjects\AbstractTransferObject.cs" />
+    <Compile Include="Assets\Scripts\Networking\TransferObjects\FlagTransferObject.cs" />
     <Compile Include="Assets\Scripts\Networking\TransferObjects\SimpleParameterTransferObject.cs" />
     <Compile Include="Assets\Scripts\QRCodePanel.cs" />
     <Compile Include="Assets\Scripts\ServerSelectController.cs" />

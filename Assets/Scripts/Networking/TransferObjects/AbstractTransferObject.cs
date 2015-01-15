@@ -1,13 +1,17 @@
 using LitJson;
 using System.Text;
 using System.Security.Cryptography;
+using System;
+using Vbaccelerator.Components.Algorithms;
 
 public abstract class AbstractTransferObject {
 
     public static int SEQ_ID = 0;
+    public int seqID;
 
 	public AbstractTransferObject(Command command) {
 		this.msgType = command;
+        seqID = ++SEQ_ID;
 	}
 
 	public Command msgType {
@@ -22,33 +26,23 @@ public abstract class AbstractTransferObject {
         writer.WriteObjectStart();
 
         writer.WritePropertyName("seqID");
-        writer.Write(SEQ_ID);
+        writer.Write(seqID);
 
-        writer.WritePropertyName("appMsg");
-        writer.WriteObjectStart();
-
-        writer.WritePropertyName("playerID");
-        writer.Write("Unity");
-
-        writer.WritePropertyName("msgType");
-        writer.Write((int)msgType);
     }
 
     public string writeJsonEnd(StringBuilder builder, JsonWriter writer)
     {
         writer.WriteObjectEnd();
-        writer.WriteObjectEnd();
 
         string temp = builder.ToString();
+        temp = temp.Replace(@"\", "");
 
-        MD5 md5 = new MD5CryptoServiceProvider();
-        byte[] textToHash = Encoding.Default.GetBytes(temp);
-        byte[] result = md5.ComputeHash(textToHash);
-        string hash = System.BitConverter.ToString(result);
+        byte[] textToHash = Encoding.UTF8.GetBytes(temp);
+        long crcVal = CRC32.calcCrc32(textToHash);
 
         temp = temp.Remove(temp.Length - 1);
 
-        return temp + ", \"checkSum\": \"" + hash + "\"}";
+        return temp + ", \"checkSum\": " + crcVal.ToString() + "}\0";
 
     }
 

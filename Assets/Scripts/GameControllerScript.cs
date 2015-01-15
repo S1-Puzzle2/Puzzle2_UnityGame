@@ -88,20 +88,20 @@ public class GameControllerScript : MonoBehaviour {
 
         if (commandReceived)
         {
-            Debug.Log("Command received! BAM");
             string dataNull = data == null ? "yes : (" : "No";
             Debug.Log("Is data null?" + dataNull);
 
-            int cmdId = (int)data["appMsg"]["msgType"];
-            receivedCommand = (Command)cmdId;
-            
+            JsonData appMsg = JsonMapper.ToObject(Base64.Base64Decode(data["appMsg"].ToString()));
+            receivedCommand = CommandMethods.getCommand(appMsg["msgType"].ToString());
+            Debug.Log("received Command: " + receivedCommand);
+
             switch (receivedCommand)
             {
                 case Command.QrCodeSend:
                     qrCodePanel.enablePanel();
 
-                    string uid1 = (string) data["appMsg"]["msgData"]["uid1"];
-                    string uid2 = (string) data["appMsg"]["msgData"]["uid2"];
+                    string uid1 = (string) appMsg["msgData"]["uid1"];
+                    string uid2 = (string) appMsg["msgData"]["uid2"];
 
                     Debug.Log("QR Contents: " + uid1 + " / " + uid2);
 
@@ -110,7 +110,10 @@ public class GameControllerScript : MonoBehaviour {
 
                     qrCodePanel.setQRCodes(qr1, qr2);
                     break;
-                case Command.GameDataSend:
+                case Command.Registered:
+                    Debug.Log("Register completed");
+                    break;
+                case Command.GameStateResponse:
                     //TODO: write
                     break;
                 case Command.Pause:
@@ -221,34 +224,6 @@ public class GameControllerScript : MonoBehaviour {
     {
         this.data = data;
         commandReceived = true;
-        /*
-
-        Debug.Log("Received Command: " + receivedCommand);
-
-        switch (receivedCommand)
-        {
-            case Command.Pause:
-                break;
-            case Command.QrCodeSend:
-                
-                string uid1 = (string) data["appMsg"]["msgData"]["uid1"];
-                string uid2 = (string) data["appMsg"]["msgData"]["uid2"];
-
-                Color32[] qr1 = qrWriter.Write(uid1);
-                Color32[] qr2 = qrWriter.Write(uid2);
-
-                commandArgs = new System.Object[] { qr1, qr2 };
-                break;
-            case Command.PenaltyTimeAdd:
-                break;
-            case Command.GameDataSend:
-                break;
-            case Command.PieceScanned:
-                break;
-        }
-
-        commandReceived = true;
-         * */
     }
 
 

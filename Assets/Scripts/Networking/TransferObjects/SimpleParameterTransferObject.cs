@@ -24,23 +24,42 @@ using LitJson;
 
             writeJsonStart(writer);
 
+            writer.WritePropertyName("appMsg");
+            StringBuilder appMsgSb = new StringBuilder();
+            JsonWriter appMsgWriter = new JsonWriter(appMsgSb);
+
+            appMsgWriter.WriteObjectStart();
+
+            appMsgWriter.WritePropertyName("msgType");
+            appMsgWriter.Write(CommandMethods.getString(msgType));
+
+            appMsgWriter.WritePropertyName("msgData");
+            appMsgWriter.WriteObjectStart();
+
+            appMsgWriter.WritePropertyName("clientType");
+            appMsgWriter.Write("Unity");
+
             if (parameters != null && parameters.Count != 0)
             {
                 foreach (String s in parameters.Keys)
                 {
-                    writer.WritePropertyName(s.ToString());
+                    appMsgWriter.WritePropertyName(s.ToString());
 
                     if (parameters[s] is int)
                     {
-                        writer.Write((int)parameters[s]);
+                        appMsgWriter.Write((int)parameters[s]);
                     }
                     else
                     {
-                        writer.Write(parameters[s].ToString());
+                        appMsgWriter.Write(parameters[s].ToString());
                     }
                 }
             }
 
+            appMsgWriter.WriteObjectEnd();
+            appMsgWriter.WriteObjectEnd();
+            string appMsgText = Base64.Base64Encode(appMsgSb.ToString());
+            writer.Write(appMsgText);
 
             return writeJsonEnd(sb, writer);
         }

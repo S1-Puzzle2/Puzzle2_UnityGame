@@ -2004,9 +2004,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ip: 192.168.0.19
-  port: 4712
+  port: 4711
+  timeOutSec: 60000
   broadcastIP: 192.168.0.255
-  broadcastPort: 4713
+  broadcastPort: 4712
   gameController: {fileID: 1576661407}
 --- !u!4 &1373957589
 Transform:
@@ -2386,24 +2387,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f8e50beb80f14d4e8ebe801cf6249aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  puzzleTextures:
-  - {fileID: 21300000, guid: 72afc2d8682fa874ea517a4ae3d72f1d, type: 3}
-  - {fileID: 21300000, guid: 49221ef7d6b9be044ad30bc052506877, type: 3}
-  - {fileID: 21300000, guid: c91e79e73bddd5049a7721c45096d961, type: 3}
-  - {fileID: 21300000, guid: 5dd8d74a3f039c8429d4adc8ddd7aa77, type: 3}
-  - {fileID: 21300000, guid: 0505845f32f92ac448bca0028a01d1e1, type: 3}
-  - {fileID: 21300000, guid: 0177cb50c111bfd4f813cf7a7f5aa7c5, type: 3}
-  - {fileID: 21300000, guid: 6eebd2bd64bcdcb42b9a692f9af38817, type: 3}
-  - {fileID: 21300000, guid: f79d1607730af4342a43d45779aeda5a, type: 3}
-  - {fileID: 21300000, guid: a568e1c3436867a4384e2ec2b6446e79, type: 3}
-  puzzlePiecePrefab: {fileID: 100000, guid: 456dc094c30f0eb478d78e70f9de38bf, type: 2}
+  puzzleTextures: []
+  puzzlePiecePrefab: {fileID: 0}
   boundaries:
-    minX: -7.9000001
-    maxX: -3
-    minY: -6.80000019
-    maxY: -4.5999999
-  snapDistance: .600000024
+    minX: 0
+    maxX: 0
+    minY: 0
+    maxY: 0
+  snapDistance: 0
   qrCodePanel: {fileID: 1224107393}
+  paused: 0
 --- !u!4 &1576661408
 Transform:
   m_ObjectHideFlags: 0
