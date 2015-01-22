@@ -7,6 +7,8 @@ public enum Command {
 	QrCodeSend,
 	GetGameState,
     GameStateResponse,
+    GetImage,
+    GetImageResponse,
 	PieceScanned,
 	PenaltyTimeAdd,
 	AreYouThere,
@@ -33,8 +35,15 @@ static class CommandMethods
                 return "GAME_STATE_RESPONSE";
             case Command.MalformedCommand:
                 return "MALFORMED_COMMAND";
+            case Command.GetImage:
+                return "GET_IMAGE";
+            case Command.GetImageResponse:
+                return "IMAGE";
             case Command.Registered:
                 return "REGISTERED";
+            case Command.QrCodeSend:
+                return "SHOW_QR";
+                
             default:
                 return "UNKNOWN COMMAND";
         }
@@ -57,7 +66,7 @@ static class CommandMethods
         {
             return Command.GetGameState;
         } 
-        else if(commandString.Equals("GAME_STATE_RESPONSE")) 
+        else if(commandString.Equals("GAME_STATE")) 
         {
             return Command.GameStateResponse;
         }
@@ -68,6 +77,13 @@ static class CommandMethods
         else if (commandString.Equals("REGISTERED"))
         {
             return Command.Registered;
+        }
+        else if (commandString.Equals("SHOW_QR"))
+        {
+            return Command.QrCodeSend;
+        } 
+        else if(commandString.Equals("GET_IMAGE")) {
+            return Command.GetImage;
         }
         else
         {

@@ -6,7 +6,7 @@ using System.Text;
 using LitJson;
 using System;
 using Vbaccelerator.Components.Algorithms;
-using Pathfinding.Serialization.JsonFx;
+using System.IO;
 
 public class NetworkController : MonoBehaviour {
 
@@ -21,7 +21,10 @@ public class NetworkController : MonoBehaviour {
     public Dictionary<System.Timers.Timer, AbstractTransferObject> timeOutTimers;
 
 	private ConnectionManager connManager;
+    private LinkedList<int> allreadyReceivedSeqID;
 	private bool connected;
+
+    private string log;
 
 	// Use this for initialization
 	void Start () {
@@ -32,6 +35,9 @@ public class NetworkController : MonoBehaviour {
 
         Thread thread = new Thread(broadCastTest);
 		thread.Start();
+        allreadyReceivedSeqID = new LinkedList<int>();
+
+
 	}
 
     private void broadCastTest()
@@ -53,7 +59,7 @@ public class NetworkController : MonoBehaviour {
 
     public void broadcastSend()
     {
-        SimpleParameterTransferObject spto = new SimpleParameterTransferObject(Command.AreYouThere, null);
+        SimpleParameterTransferObject spto = new SimpleParameterTransferObject(Command.AreYouThere, null, null);
         Debug.Log(spto.toJson());
         connManager.send(spto, new ConnectionDelegates.SentHandler(sentCallback));
     }
@@ -103,7 +109,7 @@ public class NetworkController : MonoBehaviour {
 	private void connectedCallback() {
 		connected = true;
         Debug.Log("connected");
-        SimpleParameterTransferObject registerPackage = new SimpleParameterTransferObject(Command.Register, null);
+        SimpleParameterTransferObject registerPackage = new SimpleParameterTransferObject(Command.Register, null, null);
         sendConn(registerPackage);
 	}
 	
@@ -115,40 +121,53 @@ public class NetworkController : MonoBehaviour {
 
         response = response.Remove(response.Length - 1);
         Debug.Log("received: " + response);
+        log += "Response: " + response + "\r\n\r\n\r\n";
+        File.WriteAllText("C:\\Users\\faisstm\\Desktop\\log.txt", log);
+		
+		
+        JsonData responseData = JsonMapper.ToObject(response);
+        long crc = 0;
+        try
+        {
+            crc = long.Parse(responseData["checkSum"].ToString());
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e.Message);
+        }
 
-        JsonReaderSettings readerSettings = new JsonReaderSettings();
-        Pathfinding.Serialization.JsonFx.JsonReader reader = new Pathfinding.Serialization.JsonFx.JsonReader(response);
-        Dictionary<String, System.Object> readed = (Dictionary<String, System.Object>)reader.Deserialize();
-        
-        long crc = (long)readed["checkSum"];
-        Debug.Log(crc);
-
-        int recSeqID = (int)readed["seqID"];
-        Debug.Log(recSeqID);
+        int recSeqID = (int)responseData["seqID"];
 
         bool checkSumCorrect = checkCheckSum(response, crc);
 
-        JsonData responseData = JsonMapper.ToObject(response);
 
         if (checkSumCorrect)
         {
             Debug.Log("Checksum correct");
+            if (allreadyReceivedSeqID.Contains(recSeqID))
+            {
+                connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
+                return;
+            }
+            else
+            {
+                allreadyReceivedSeqID.AddFirst(recSeqID);
+            }
+
             if (responseData.Keys.Contains("appMsg"))
             {
                 Debug.Log("Received appMsg: " + Base64.Base64Decode(responseData["appMsg"].ToString()));
                 gameController.updateFromNetwork(responseData);
-                FlagTransferObject fto = new FlagTransferObject(true, false, false, recSeqID);
+                FlagTransferObject fto = new FlagTransferObject(true, false, recSeqID);
                 sendConn(fto);
             }
             else if (responseData.Keys.Contains("flags"))
             {
-                Debug.Log("Ack received");
                 foreach (System.Timers.Timer t in timeOutTimers.Keys)
                 {
                     AbstractTransferObject obj = timeOutTimers[t];
                     if (obj.seqID == recSeqID)
                     {
-                        Debug.Log("Ack from " + recSeqID + " received, stoping timer");
                         t.Stop();
                         timeOutTimers.Remove(t);
                         break;
@@ -159,13 +178,13 @@ public class NetworkController : MonoBehaviour {
         }
         else
         {
-            Debug.Log("checksum not correct");
-            FlagTransferObject fto = new FlagTransferObject(true, false, true, recSeqID);
+            Debug.Log("CheckSum false");
+            FlagTransferObject fto = new FlagTransferObject(true, false, recSeqID);
             sendConn(fto);
         }
 
-        
         connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
+        
 	}
 
     private bool checkCheckSum(string response, long crc)

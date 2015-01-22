@@ -9,11 +9,13 @@ using LitJson;
 
         private Dictionary<String, System.Object> parameters;
         private bool parametersExist;
+        private string clientID;
 
-        public SimpleParameterTransferObject(Command cmd, Dictionary<String, System.Object> parameters) 
+        public SimpleParameterTransferObject(Command cmd, string clientID, Dictionary<String, System.Object> parameters) 
             : base(cmd)
         {
             this.parameters = parameters;
+            this.clientID = clientID;
         }
 
         public override string toJson()
@@ -29,6 +31,9 @@ using LitJson;
             JsonWriter appMsgWriter = new JsonWriter(appMsgSb);
 
             appMsgWriter.WriteObjectStart();
+
+            appMsgWriter.WritePropertyName("clientID");
+            appMsgWriter.Write(clientID);
 
             appMsgWriter.WritePropertyName("msgType");
             appMsgWriter.Write(CommandMethods.getString(msgType));

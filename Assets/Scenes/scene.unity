@@ -2395,6 +2395,7 @@ MonoBehaviour:
     minY: 0
     maxY: 0
   snapDistance: 0
+  networkController: {fileID: 1373957588}
   qrCodePanel: {fileID: 1224107393}
   paused: 0
 --- !u!4 &1576661408

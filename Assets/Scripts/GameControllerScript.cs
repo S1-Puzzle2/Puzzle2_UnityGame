@@ -12,6 +12,7 @@ public class GameControllerScript : MonoBehaviour {
 	public GameObject puzzlePiecePrefab;
 	public TwoDBoundaries boundaries;
 	public float snapDistance;
+    public NetworkController networkController;
 
     public QRCodePanel qrCodePanel;
 
@@ -26,11 +27,16 @@ public class GameControllerScript : MonoBehaviour {
 	private float time_Team1;
 	private float time_Team2;
 
-    private BarcodeWriter qrWriter;
+    private string team1_clientID;
+    private string team2_clientID;
+    private string team1_qrCode;
+    private string team2_qrCode;
 
-    private bool commandReceived = false;
-    private Command receivedCommand;
-    private JsonData data;
+    private BarcodeWriter qrWriter;
+    private int registeredCount;
+    private int gameStateCount;
+
+    private LinkedList<JsonData> receivedData;
 
     public bool paused = false;
     
@@ -45,6 +51,9 @@ public class GameControllerScript : MonoBehaviour {
 
         qrWriter = new BarcodeWriter { Format = BarcodeFormat.QR_CODE, Options = new QrCodeEncodingOptions { Height = 256, Width = 256 } };
         qrCodePanel.disablePanel();
+        registeredCount = 0;
+
+        receivedData = new LinkedList<JsonData>();
 	}
 
     public void startGame()
@@ -86,35 +95,92 @@ public class GameControllerScript : MonoBehaviour {
             time_Team2 += Time.deltaTime;
         }
 
-        if (commandReceived)
+        if (receivedData.Count > 0)
         {
+            JsonData data = receivedData.First.Value;
+            receivedData.RemoveFirst();
             string dataNull = data == null ? "yes : (" : "No";
             Debug.Log("Is data null?" + dataNull);
 
             JsonData appMsg = JsonMapper.ToObject(Base64.Base64Decode(data["appMsg"].ToString()));
-            receivedCommand = CommandMethods.getCommand(appMsg["msgType"].ToString());
+            Command receivedCommand = CommandMethods.getCommand(appMsg["msgType"].ToString());
             Debug.Log("received Command: " + receivedCommand);
 
             switch (receivedCommand)
             {
                 case Command.QrCodeSend:
-                    qrCodePanel.enablePanel();
 
-                    string uid1 = (string) appMsg["msgData"]["uid1"];
-                    string uid2 = (string) appMsg["msgData"]["uid2"];
+                    if (appMsg["clientID"].ToString() == team1_clientID)
+                    {
+                        team1_qrCode = appMsg["msgData"]["qrCode"].ToString();
+                    }
+                    else if (appMsg["clientID"].ToString() == team2_clientID)
+                    {
+                        team2_qrCode = appMsg["msgData"]["qrCode"].ToString();
+                    }
 
-                    Debug.Log("QR Contents: " + uid1 + " / " + uid2);
+                    if(team1_qrCode != null && team2_qrCode != null && !string.IsNullOrEmpty(team1_qrCode) && !string.IsNullOrEmpty(team2_qrCode)) {
+                        Color32[] qr1 = qrWriter.Write(team1_qrCode);
+                        Color32[] qr2 = qrWriter.Write(team2_qrCode);
+                        qrCodePanel.enablePanel();
+                        qrCodePanel.setQRCodes(qr1, qr2);
+                    }
 
-                    Color32[] qr1 = qrWriter.Write(uid1);
-                    Color32[] qr2 = qrWriter.Write(uid2);
-
-                    qrCodePanel.setQRCodes(qr1, qr2);
                     break;
                 case Command.Registered:
-                    Debug.Log("Register completed");
+                    registeredCount++;
+
+                    if (registeredCount == 1)
+                    {
+                        team1_clientID = appMsg["clientID"].ToString();
+                        SimpleParameterTransferObject registerPackage = new SimpleParameterTransferObject(Command.Register, null, null);
+                        networkController.sendConn(registerPackage);
+                        Debug.Log("Team 1 registered complete");
+                    }
+                    else if (registeredCount == 2)
+                    {
+                        team2_clientID = appMsg["clientID"].ToString();
+                        Debug.Log("Team 2 registered complete");
+                        SimpleParameterTransferObject gameStatePackage = new SimpleParameterTransferObject(Command.GetGameState, team1_clientID, null);
+                        networkController.sendConn(gameStatePackage);
+                    }
+
                     break;
                 case Command.GameStateResponse:
-                    //TODO: write
+                    // TODO: save puzzle pieces etc.
+
+                    gameStateCount++;
+
+                    string usedClientID = "";
+                    if (gameStateCount == 1)
+                    {
+                        usedClientID = team1_clientID;
+                    }
+                    else if (gameStateCount == 2)
+                    {
+                        usedClientID = team2_clientID;
+                    }
+
+                    JsonData imageIDs = appMsg["msgData"]["imageIDs"];
+                    if (imageIDs.IsArray)
+                    {
+                        int count = imageIDs.Count;
+                        for (int i = 0; i < count; i++)
+                        {
+                            Dictionary<string, object> paramsDict = new Dictionary<string, object>();
+                            paramsDict.Add("imageID", (int)imageIDs[i]);
+                            SimpleParameterTransferObject getImagePackage = new SimpleParameterTransferObject(Command.GetImage, usedClientID, paramsDict);
+                            networkController.sendConn(getImagePackage);
+                        }
+                    }
+
+
+                    if (gameStateCount == 1)
+                    {
+                        SimpleParameterTransferObject gameStatePackage = new SimpleParameterTransferObject(Command.GetGameState, team2_clientID, null);
+                        networkController.sendConn(gameStatePackage);
+                    }
+                    
                     break;
                 case Command.Pause:
                     Time.timeScale = 0;
@@ -131,7 +197,6 @@ public class GameControllerScript : MonoBehaviour {
                     break;
             }
 
-            commandReceived = false;
         }
 
 	}
@@ -222,8 +287,7 @@ public class GameControllerScript : MonoBehaviour {
 
     public void updateFromNetwork(JsonData data)
     {
-        this.data = data;
-        commandReceived = true;
+        receivedData.AddLast(data);
     }
 
 

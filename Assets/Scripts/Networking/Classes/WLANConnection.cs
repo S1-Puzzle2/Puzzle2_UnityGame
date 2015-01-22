@@ -17,7 +17,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	
 	public class StateObject {
 		public Socket workSocket = null;
-		public const int bufferSize = 1024;
+		public const int bufferSize = 1;
 		public byte[] buffer = new byte[bufferSize];
 		public StringBuilder sb = new StringBuilder();
 	}
@@ -25,7 +25,10 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	private ManualResetEvent connected = new ManualResetEvent(false);
 	private ManualResetEvent sent = new ManualResetEvent(false);
 	private ManualResetEvent received = new ManualResetEvent(false);
-		
+
+    public ReceivedHandler receivedCallback;
+    private bool callbackSet = false;
+	
 	public void open(ClientType type, ConnectionType connType, IConnectionDef def, ConnectionDelegates.ConnectedHandler callback) {
 	
 		Connected += callback;
@@ -53,7 +56,6 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	
 	public void send(AbstractTransferObject obj, ConnectionDelegates.SentHandler callback) {
 		if(socket.Connected) {	
-		
 			Sent += callback;
 			String jsonString = obj.toJson() + "\n";
 			byte[] jsonBA = Encoding.UTF8.GetBytes(jsonString);
@@ -72,7 +74,8 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	
 	public void receive(ConnectionDelegates.ReceivedHandler callback) {
 		Debug.Log("start receiving");
-		Received += callback;
+        receivedCallback = callback;
+        Received += receivedCallback;
 		StateObject state = new StateObject();
 		state.workSocket = socket;
 		socket.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
@@ -93,6 +96,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
                 response = state.sb.ToString();
                 received.Set();
                 OnReceived(response);
+                Received -= receivedCallback;
             }
             else
             {
@@ -107,6 +111,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
                 response = state.sb.ToString();
                 received.Set();
                 OnReceived(response);
+                Received -= receivedCallback;
             }
         }
 

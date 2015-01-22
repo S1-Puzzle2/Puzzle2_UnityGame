@@ -10,11 +10,10 @@ class FlagTransferObject : AbstractTransferObject
     private bool close;
     private bool error;
 
-    public FlagTransferObject(bool ack, bool close, bool error, int seqID) : base(Command.NoCommand)
+    public FlagTransferObject(bool ack, bool close, int seqID) : base(Command.NoCommand)
     {
         this.ack = ack;
         this.close = close;
-        this.error = error;
         this.seqID = seqID;
     }
 
@@ -31,11 +30,8 @@ class FlagTransferObject : AbstractTransferObject
         writer.WritePropertyName("ack");
         writer.Write(ack);
 
-        writer.WritePropertyName("close");
-        writer.Write(close);
-
-        writer.WritePropertyName("error");
-        writer.Write(error);
+        //writer.WritePropertyName("close");
+        //writer.Write(close);
 
         writer.WriteObjectEnd();
 
