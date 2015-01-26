@@ -14,7 +14,9 @@ public enum Command {
 	AreYouThere,
     NoCommand,
     MalformedCommand,
-    Registered
+    Registered,
+    CreatePuzzle,
+    CreatePuzzlePart
 }
 
 static class CommandMethods
@@ -43,6 +45,10 @@ static class CommandMethods
                 return "REGISTERED";
             case Command.QrCodeSend:
                 return "SHOW_QR";
+            case Command.CreatePuzzle:
+                return "CREATE_PUZZLE";
+            case Command.CreatePuzzlePart:
+                return "CREATE_PUZZLE_PART";
                 
             default:
                 return "UNKNOWN COMMAND";
@@ -84,6 +90,18 @@ static class CommandMethods
         } 
         else if(commandString.Equals("GET_IMAGE")) {
             return Command.GetImage;
+        }
+        else if (commandString.Equals("IMAGE"))
+        {
+            return Command.GetImageResponse;
+        }
+        else if (commandString.Equals("CREATE_PUZZLE"))
+        {
+            return Command.CreatePuzzle;
+        }
+        else if (commandString.Equals("CREATE_PUZZLE_PART"))
+        {
+            return Command.CreatePuzzlePart;
         }
         else
         {

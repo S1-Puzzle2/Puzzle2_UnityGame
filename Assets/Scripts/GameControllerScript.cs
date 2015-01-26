@@ -31,10 +31,15 @@ public class GameControllerScript : MonoBehaviour {
     private string team2_clientID;
     private string team1_qrCode;
     private string team2_qrCode;
+    private int imageCount;
+    private int team1_images_received;
+    private int team2_images_received;
 
     private BarcodeWriter qrWriter;
     private int registeredCount;
     private int gameStateCount;
+
+   
 
     private LinkedList<JsonData> receivedData;
 
@@ -112,11 +117,13 @@ public class GameControllerScript : MonoBehaviour {
 
                     if (appMsg["clientID"].ToString() == team1_clientID)
                     {
-                        team1_qrCode = appMsg["msgData"]["qrCode"].ToString();
+                        team1_qrCode = "[protocols]eth::http://" + networkController.ip + ":" + networkController.port + "[clientID]" + appMsg["msgData"]["qrCode"].ToString();
+                        Debug.Log("QR Code from Team 1 set");
                     }
                     else if (appMsg["clientID"].ToString() == team2_clientID)
                     {
-                        team2_qrCode = appMsg["msgData"]["qrCode"].ToString();
+                        team2_qrCode = "[protocols]eth::http://" + networkController.ip + ":" + networkController.port + "[clientID]" + appMsg["msgData"]["qrCode"].ToString();
+                        Debug.Log("QR Code from Team 2 set");
                     }
 
                     if(team1_qrCode != null && team2_qrCode != null && !string.IsNullOrEmpty(team1_qrCode) && !string.IsNullOrEmpty(team2_qrCode)) {
@@ -164,6 +171,7 @@ public class GameControllerScript : MonoBehaviour {
                     JsonData imageIDs = appMsg["msgData"]["imageIDs"];
                     if (imageIDs.IsArray)
                     {
+                        imageCount = imageIDs.Count;
                         int count = imageIDs.Count;
                         for (int i = 0; i < count; i++)
                         {
@@ -182,6 +190,31 @@ public class GameControllerScript : MonoBehaviour {
                     }
                     
                     break;
+                case Command.GetImageResponse:
+
+                    Debug.Log("Image received");
+                    if(appMsg["clientID"].ToString() == team1_clientID) {
+                        team1_images_received++;
+
+                        if (team1_images_received == imageCount)
+                        {
+                            SimpleParameterTransferObject readyCommand = new SimpleParameterTransferObject(Command.Ready, team1_clientID, null);
+                            networkController.sendConn(readyCommand);
+                        }
+                    }
+                    else if (appMsg["clientID"].ToString() == team2_clientID)
+                    {
+                        team2_images_received++;
+
+                        if (team2_images_received == imageCount)
+                        {
+                            SimpleParameterTransferObject readyCommand = new SimpleParameterTransferObject(Command.Ready, team2_clientID, null);
+                            networkController.sendConn(readyCommand);
+                        }
+                    }
+
+                    break;
+
                 case Command.Pause:
                     Time.timeScale = 0;
                     paused = true;

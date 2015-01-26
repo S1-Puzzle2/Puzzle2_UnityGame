@@ -6,6 +6,7 @@ using System.Threading;
 using System;
 using LitJson;
 using System.Text;
+using System.IO;
 
 public class WLANConnection : ConnectionDelegates, IConnection {
 
@@ -17,7 +18,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	
 	public class StateObject {
 		public Socket workSocket = null;
-		public const int bufferSize = 1;
+		public const int bufferSize = 1024;
 		public byte[] buffer = new byte[bufferSize];
 		public StringBuilder sb = new StringBuilder();
 	}
@@ -28,6 +29,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 
     public ReceivedHandler receivedCallback;
     private bool callbackSet = false;
+    private string log = "";
 	
 	public void open(ClientType type, ConnectionType connType, IConnectionDef def, ConnectionDelegates.ConnectedHandler callback) {
 	
@@ -74,8 +76,13 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	
 	public void receive(ConnectionDelegates.ReceivedHandler callback) {
 		Debug.Log("start receiving");
-        receivedCallback = callback;
-        Received += receivedCallback;
+
+        if (callbackSet == false)
+        {
+            receivedCallback = callback;
+            Received += receivedCallback;
+            callbackSet = true;
+        }
 		StateObject state = new StateObject();
 		state.workSocket = socket;
 		socket.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
@@ -90,18 +97,64 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 
         if (bytesRead > 0)
         {
-            state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
+            string[] responseSplit = Encoding.ASCII.GetString(state.buffer, 0, bytesRead).Split(new char[] {'\0'});
+
+            log += "Length: " + responseSplit.Length + "\r\n";
+            if (responseSplit.Length == 0)
+            {
+                log += "WTF????????";
+            }
+            foreach (string s in responseSplit)
+            {
+                log += s;
+            }
+            log += "\r\n\r\n";
+
+            File.WriteAllText("C:\\Users\\faisstm\\Desktop\\log2.txt", log);
+            if (responseSplit.Length == 1)
+            {
+                state.sb.Append(responseSplit[0]);
+                client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+            }
+            else
+            {
+                for (int i = 0; i < responseSplit.Length; i++)
+                {
+                    if (i == responseSplit.Length - 1)
+                    {
+                        if (responseSplit[i].Length != 0)
+                        {
+                            state.sb.Length = 0;
+                            state.sb.Append(responseSplit[i]);
+                            client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        state.sb.Append(responseSplit[i]);
+                        response = state.sb.ToString();
+                        received.Set();
+                        OnReceived(response);
+                        state.sb.Length = 0;
+                    }
+                }
+            }
+            /*state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
             if (state.sb.ToString().Contains("\0"))
             {
                 response = state.sb.ToString();
                 received.Set();
                 OnReceived(response);
-                Received -= receivedCallback;
+                //Received -= receivedCallback;
             }
             else
             {
                 client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
-            }
+            } */
 
         }
         else
@@ -111,7 +164,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
                 response = state.sb.ToString();
                 received.Set();
                 OnReceived(response);
-                Received -= receivedCallback;
+                //Received -= receivedCallback;
             }
         }
 

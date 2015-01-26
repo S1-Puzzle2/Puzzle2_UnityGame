@@ -109,6 +109,10 @@ public class NetworkController : MonoBehaviour {
 	private void connectedCallback() {
 		connected = true;
         Debug.Log("connected");
+
+        // send images to server
+        //sendImagesToServer();
+
         SimpleParameterTransferObject registerPackage = new SimpleParameterTransferObject(Command.Register, null, null);
         sendConn(registerPackage);
 	}
@@ -119,7 +123,7 @@ public class NetworkController : MonoBehaviour {
 	
 	private void receiveCallback(string response) {
 
-        response = response.Remove(response.Length - 1);
+        //response = response.Remove(response.Length - 1);
         Debug.Log("received: " + response);
         log += "Response: " + response + "\r\n\r\n\r\n";
         File.WriteAllText("C:\\Users\\faisstm\\Desktop\\log.txt", log);
@@ -179,7 +183,7 @@ public class NetworkController : MonoBehaviour {
         else
         {
             Debug.Log("CheckSum false");
-            FlagTransferObject fto = new FlagTransferObject(true, false, recSeqID);
+            FlagTransferObject fto = new FlagTransferObject(false, false, recSeqID);
             sendConn(fto);
         }
 
@@ -192,6 +196,7 @@ public class NetworkController : MonoBehaviour {
         string responseWithoutChecksum = response.Remove(response.IndexOf(",\"checkSum")) + "}";
         byte[] bytes = Encoding.UTF8.GetBytes(responseWithoutChecksum);
         long crcVal = CRC32.calcCrc32(bytes);
+        Debug.Log("Got Checksum: " + crc + ", Calc crc: " + crcVal);
 
         if (crc == crcVal)
         {
@@ -201,5 +206,34 @@ public class NetworkController : MonoBehaviour {
         {
             return false;
         }
+    }
+
+    private void sendImagesToServer()
+    {
+        Dictionary<string, object> parameters = new Dictionary<string,object>();
+        parameters.Add("gameName", "hammergood puzzle");
+
+        SimpleParameterTransferObject createPuzzlePackage = new SimpleParameterTransferObject(Command.CreatePuzzle, null, parameters);
+        //sendConn(createPuzzlePackage);
+
+        string path = "C:\\Users\\faisstm\\Desktop\\coolQuad\\";
+        string[] images = Directory.GetFiles(path, "*.jpg", SearchOption.TopDirectoryOnly);
+        string[] base64Data = new string[images.Length];
+
+        for (int i = 0; i < images.Length; i++)
+        {
+            byte[] imageData = File.ReadAllBytes(images[i]);
+            base64Data[i] = Convert.ToBase64String(imageData);
+
+            parameters = new Dictionary<string, object>();
+            parameters.Add("partOrder", i);
+            parameters.Add("gameName", "hammergood puzzle");
+            parameters.Add("base64Image", base64Data[i]);
+            parameters.Add("barCode", System.Guid.NewGuid().ToString());
+            SimpleParameterTransferObject createPiecePackage = new SimpleParameterTransferObject(Command.CreatePuzzlePart, null, parameters);
+            sendConn(createPiecePackage);
+        }
+
+
     }
 }
