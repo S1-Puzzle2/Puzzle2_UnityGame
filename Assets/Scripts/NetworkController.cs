@@ -125,10 +125,7 @@ public class NetworkController : MonoBehaviour {
 
         //response = response.Remove(response.Length - 1);
         Debug.Log("received: " + response);
-        log += "Response: " + response + "\r\n\r\n\r\n";
-        File.WriteAllText("C:\\Users\\faisstm\\Desktop\\log.txt", log);
-		
-		
+        
         JsonData responseData = JsonMapper.ToObject(response);
         long crc = 0;
         try
@@ -150,7 +147,7 @@ public class NetworkController : MonoBehaviour {
             Debug.Log("Checksum correct");
             if (allreadyReceivedSeqID.Contains(recSeqID))
             {
-                connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
+                //connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
                 return;
             }
             else
@@ -187,7 +184,7 @@ public class NetworkController : MonoBehaviour {
             sendConn(fto);
         }
 
-        connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
+        //connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
         
 	}
 

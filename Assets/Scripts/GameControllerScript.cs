@@ -5,19 +5,23 @@ using LitJson;
 using ZXing;
 using System.Collections.Generic;
 using ZXing.QrCode;
+using System.IO;
 
 public class GameControllerScript : MonoBehaviour {
 
-	public Sprite[] puzzleTextures;
 	public GameObject puzzlePiecePrefab;
-	public TwoDBoundaries boundaries;
+	public TwoDBoundaries boundaries1;
+    public TwoDBoundaries boundaries2;
 	public float snapDistance;
     public NetworkController networkController;
+    public GameObject uiController;
 
     public QRCodePanel qrCodePanel;
 
-	private GameObject[] puzzlePieces;
+	private GameObject[] puzzlePieces1;
+    private GameObject[] puzzlePieces2;
 	private GameObject[] gridColliders;
+    private GameObject[] gridColliders2;
 	private bool notEnoughColliders;
 
     private bool started;
@@ -33,15 +37,14 @@ public class GameControllerScript : MonoBehaviour {
     private string team2_qrCode;
     private int imageCount;
     private int team1_images_received;
-    private int team2_images_received;
 
     private BarcodeWriter qrWriter;
     private int registeredCount;
     private int gameStateCount;
 
-   
-
+    private Texture2D[] orderPuzzleImages;
     private LinkedList<JsonData> receivedData;
+    string log = "";
 
     public bool paused = false;
     
@@ -59,36 +62,59 @@ public class GameControllerScript : MonoBehaviour {
         registeredCount = 0;
 
         receivedData = new LinkedList<JsonData>();
+        orderPuzzleImages = new Texture2D[9];
+        //startGame();
 	}
 
     public void startGame()
     {
-        gridColliders = GameObject.FindGameObjectsWithTag("GridCollider").OrderBy(go => go.name).ToArray();
-
-        if (gridColliders.Length < puzzleTextures.Length)
+        if (!started)
         {
-            notEnoughColliders = true;
-            Debug.LogError("Not enough grid colliders in the scene");
-        }
-        else
-        {
+            gridColliders = GameObject.FindGameObjectsWithTag("GridCollider").OrderBy(go => go.name).ToArray();
+            gridColliders2 = GameObject.FindGameObjectsWithTag("GridCollider2").OrderBy(go => go.name).ToArray();
 
-            puzzlePieces = new GameObject[puzzleTextures.Length];
-            for (int i = 0; i < puzzleTextures.Length; i++)
+            if (gridColliders.Length < orderPuzzleImages.Length || gridColliders2.Length < orderPuzzleImages.Length)
+            {
+                notEnoughColliders = true;
+                Debug.LogError("Not enough grid colliders in the scene");
+            }
+            else
             {
 
-                Vector3 createdPos = new Vector3(Random.Range(boundaries.minX, boundaries.maxX), Random.Range(boundaries.minY, boundaries.maxY), 0.0f);
-                puzzlePieces[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
-                puzzlePieces[i].GetComponent<SpriteRenderer>().sprite = puzzleTextures[i];
-                puzzlePieces[i].renderer.sortingOrder = i;
-
-                if (!notEnoughColliders)
+                puzzlePieces1 = new GameObject[orderPuzzleImages.Length];
+                for (int i = 0; i < orderPuzzleImages.Length; i++)
                 {
-                    puzzlePieces[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders[i]);
-                }
-            }
 
-            started = true;
+                    Vector3 createdPos = new Vector3(Random.Range(boundaries1.minX, boundaries1.maxX), Random.Range(boundaries1.minY, boundaries1.maxY), 0.0f);
+                    puzzlePieces1[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
+                    puzzlePieces1[i].GetComponent<SpriteRenderer>().sprite = Sprite.Create(orderPuzzleImages[i], new Rect(0, 0, orderPuzzleImages[i].width, orderPuzzleImages[i].height), new Vector2(0.5f, 0.5f));
+                    puzzlePieces1[i].renderer.sortingOrder = i;
+
+                    if (!notEnoughColliders)
+                    {
+                        puzzlePieces1[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders[i]);
+                    }
+                }
+
+                puzzlePieces2 = new GameObject[orderPuzzleImages.Length];
+                for (int i = 0; i < orderPuzzleImages.Length; i++)
+                {
+
+                    Vector3 createdPos = new Vector3(Random.Range(boundaries2.minX, boundaries2.maxX), Random.Range(boundaries2.minY, boundaries2.maxY), 0.0f);
+                    puzzlePieces2[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
+                    puzzlePieces2[i].GetComponent<SpriteRenderer>().sprite = Sprite.Create(orderPuzzleImages[i], new Rect(0, 0, orderPuzzleImages[i].width, orderPuzzleImages[i].height), new Vector2(0.5f, 0.5f));
+                    puzzlePieces2[i].renderer.sortingOrder = i;
+
+                    if (!notEnoughColliders)
+                    {
+                        puzzlePieces2[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders2[i]);
+                    }
+                }
+
+
+
+                started = true;
+            }
         }
     }
 
@@ -159,17 +185,21 @@ public class GameControllerScript : MonoBehaviour {
                     gameStateCount++;
 
                     string usedClientID = "";
+                    string teamName = appMsg["msgData"]["teamName"].ToString();
+
                     if (gameStateCount == 1)
                     {
                         usedClientID = team1_clientID;
+                        uiController.GetComponent<UIController>().setTeam1Name(teamName);
                     }
                     else if (gameStateCount == 2)
                     {
                         usedClientID = team2_clientID;
+                        uiController.GetComponent<UIController>().setTeam2Name(teamName);
                     }
 
                     JsonData imageIDs = appMsg["msgData"]["imageIDs"];
-                    if (imageIDs.IsArray)
+                    if (imageIDs.IsArray && gameStateCount == 1)
                     {
                         imageCount = imageIDs.Count;
                         int count = imageIDs.Count;
@@ -192,35 +222,54 @@ public class GameControllerScript : MonoBehaviour {
                     break;
                 case Command.GetImageResponse:
 
-                    Debug.Log("Image received");
+                    Debug.Log("Image received: " + team1_images_received);
                     if(appMsg["clientID"].ToString() == team1_clientID) {
                         team1_images_received++;
 
+                        string base64 = appMsg["msgData"]["base64Image"].ToString();
+                        int imageID = int.Parse(appMsg["msgData"]["imageID"].ToString());
+                        int order = int.Parse(appMsg["msgData"]["order"].ToString());
+
+                        log += base64 + "\r\n\r\n";
+                        
+                        File.WriteAllText("C:\\Users\\faisstm\\Desktop\\log.txt", log);
+                        byte[] imgData = System.Convert.FromBase64String(base64);
+
+                        Texture2D newTexture = new Texture2D(256, 240);
+                        if (newTexture.LoadImage(imgData))
+                        {
+                            Debug.Log("Base64 converted to Texture2D succesfully");
+                        }
+                        else
+                        {
+                            Debug.Log("Error in converting base64 to texture2d");
+                        }
+
+                        orderPuzzleImages[order] = newTexture;
+
                         if (team1_images_received == imageCount)
                         {
+                            Debug.Log("IMAGE COUNT REACHED");
                             SimpleParameterTransferObject readyCommand = new SimpleParameterTransferObject(Command.Ready, team1_clientID, null);
                             networkController.sendConn(readyCommand);
+
+                            SimpleParameterTransferObject readyCommand2 = new SimpleParameterTransferObject(Command.Ready, team2_clientID, null);
+                            networkController.sendConn(readyCommand2);
                         }
                     }
-                    else if (appMsg["clientID"].ToString() == team2_clientID)
-                    {
-                        team2_images_received++;
-
-                        if (team2_images_received == imageCount)
-                        {
-                            SimpleParameterTransferObject readyCommand = new SimpleParameterTransferObject(Command.Ready, team2_clientID, null);
-                            networkController.sendConn(readyCommand);
-                        }
-                    }
-
+                    
                     break;
-
+                case Command.GameStart:
+                    Debug.Log("GAME START YEEEEEEEEEEEEEEEEEEEEEAAAAAH!");
+                    qrCodePanel.disablePanel();
+                    startGame();
+                    break;
                 case Command.Pause:
                     Time.timeScale = 0;
                     paused = true;
                     break;
                 case Command.Ready:
-                    startGame();
+                    
                     break;
                 case Command.PenaltyTimeAdd:
                     //TODO: write
@@ -235,21 +284,21 @@ public class GameControllerScript : MonoBehaviour {
 	}
 
 	public void setHigherSortOrder(GameObject tile) {
-		if (puzzlePieces == null || puzzlePieces.Length == 0) {
+		if (puzzlePieces1 == null || puzzlePieces1.Length == 0) {
 			return;
 		}
 
 		int startSortingLayer = tile.renderer.sortingOrder;
 
-		for(int i = tile.renderer.sortingOrder + 1; i < puzzlePieces.Length; i++) {
-			if(puzzlePieces[i] != tile) {
-				puzzlePieces[i].renderer.sortingOrder--;
-				puzzlePieces[i - 1] = puzzlePieces[i];
+		for(int i = tile.renderer.sortingOrder + 1; i < puzzlePieces1.Length; i++) {
+			if(puzzlePieces1[i] != tile) {
+				puzzlePieces1[i].renderer.sortingOrder--;
+				puzzlePieces1[i - 1] = puzzlePieces1[i];
 			}
 		}
 
-		tile.renderer.sortingOrder = puzzlePieces.Length - 1;
-		puzzlePieces [puzzlePieces.Length - 1] = tile;
+		tile.renderer.sortingOrder = puzzlePieces1.Length - 1;
+		puzzlePieces1 [puzzlePieces1.Length - 1] = tile;
 	}
 
 	public GameObject snapToNextGridCollider(GameObject tile) {
@@ -265,6 +314,16 @@ public class GameControllerScript : MonoBehaviour {
 			}
 		}
 
+        foreach (GameObject collider in gridColliders2)
+        {
+            float currDistance = Vector3.Distance(tile.transform.position, collider.transform.position);
+            if (currDistance < minDistance)
+            {
+                minDistance = currDistance;
+                closestCollider = collider;
+            }
+        }
+
 		if (minDistance < snapDistance && !closestCollider.GetComponent<GridColliderController> ().isGridColliderOccupied ()) {
 			tile.transform.position = closestCollider.transform.position;
 			closestCollider.GetComponent<GridColliderController> ().setCurrentTile (tile);
@@ -277,7 +336,7 @@ public class GameControllerScript : MonoBehaviour {
 
 	public void checkIfPuzzleFinished() {
 
-		foreach (GameObject tile in puzzlePieces) {
+		foreach (GameObject tile in puzzlePieces1) {
 			TileController tileC = tile.GetComponent<TileController> ();
 
 			if (!tileC.isOnCorrectCollider ()) {
@@ -288,7 +347,7 @@ public class GameControllerScript : MonoBehaviour {
 
 		Debug.Log ("PUZZLE DONE");
 
-		foreach(GameObject tile in puzzlePieces) {
+		foreach(GameObject tile in puzzlePieces1) {
 			tile.GetComponent<TileController>().enabled = false;
 		}
 

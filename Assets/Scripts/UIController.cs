@@ -6,7 +6,10 @@ public class UIController : MonoBehaviour {
 
 	public GameObject timeTeam1;
 	public GameObject timeTeam2;
-	
+
+    public Text team1Name;
+    public Text team2Name;
+
 	private Text text_timeTeam1;
 	private Text text_timeTeam2;
 
@@ -28,4 +31,14 @@ public class UIController : MonoBehaviour {
 			text_timeTeam2.text = gameController.getTime (2).ToString("000.00");
 		}
 	}
+
+    public void setTeam1Name(string name)
+    {
+        team1Name.text = name;
+    }
+
+    public void setTeam2Name(string name)
+    {
+        team2Name.text = name;
+    }
 }

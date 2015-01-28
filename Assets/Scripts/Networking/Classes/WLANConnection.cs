@@ -7,6 +7,7 @@ using System;
 using LitJson;
 using System.Text;
 using System.IO;
+using System.Collections.Generic;
 
 public class WLANConnection : ConnectionDelegates, IConnection {
 
@@ -30,6 +31,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
     public ReceivedHandler receivedCallback;
     private bool callbackSet = false;
     private string log = "";
+    private string bufferLog = "";
 	
 	public void open(ClientType type, ConnectionType connType, IConnectionDef def, ConnectionDelegates.ConnectedHandler callback) {
 	
@@ -75,7 +77,6 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 	}
 	
 	public void receive(ConnectionDelegates.ReceivedHandler callback) {
-		Debug.Log("start receiving");
 
         if (callbackSet == false)
         {
@@ -83,11 +84,61 @@ public class WLANConnection : ConnectionDelegates, IConnection {
             Received += receivedCallback;
             callbackSet = true;
         }
+        /*
 		StateObject state = new StateObject();
 		state.workSocket = socket;
 		socket.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
+         * */
+
+        var responseListener = new SocketAsyncEventArgs();
+        responseListener.Completed += responseListener_Completed;
+
+        var responseBuffer = new byte[1024];
+        responseListener.SetBuffer(responseBuffer, 0, 1024);
+
+        socket.ReceiveAsync(responseListener);
 	}
-	
+
+    private string trailingMessage;
+    void responseListener_Completed(object sender, SocketAsyncEventArgs e)
+    {
+        var message = Encoding.UTF8.GetString(e.Buffer, 0, e.BytesTransferred);
+
+        var bufferWasPreviouslyFull = !string.IsNullOrEmpty(trailingMessage);
+        if (bufferWasPreviouslyFull)
+        {
+            message = trailingMessage + message;
+            trailingMessage = null;
+        }
+
+        //asdfLog += message + "\r\n\r\n";
+        //File.WriteAllText("C:\\Users\\faisstm\\Desktop\\buffer.txt", asdfLog);
+
+        var lines = new LinkedList<String>(message.Split(new char[]{'\0'}, StringSplitOptions.None));
+        var lastLine = lines.Last.Value;
+        var isBufferFull = !string.IsNullOrEmpty(lastLine);
+
+            if (isBufferFull)
+            {
+                trailingMessage = lastLine;
+                lines.Remove(lastLine);
+            }
+
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                OnReceived(line);
+            }
+
+        receive(receivedCallback);
+    }
+
+
+	/*
 	private void receiveCallback(IAsyncResult result) {
 		StateObject state = (StateObject) result.AsyncState;
 		Socket client = state.workSocket;
@@ -98,6 +149,10 @@ public class WLANConnection : ConnectionDelegates, IConnection {
         if (bytesRead > 0)
         {
             string[] responseSplit = Encoding.ASCII.GetString(state.buffer, 0, bytesRead).Split(new char[] {'\0'});
+
+            bufferLog += Encoding.UTF8.GetString(state.buffer);
+
+            File.WriteAllText("C:\\Users\\faisstm\\Desktop\\buffer.txt", bufferLog);
 
             log += "Length: " + responseSplit.Length + "\r\n";
             if (responseSplit.Length == 0)
@@ -154,7 +209,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
             else
             {
                 client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
-            } */
+            }
 
         }
         else
@@ -168,7 +223,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
             }
         }
 
-        /*
+       
 		int bytesRead = client.EndReceive(result);
 		if(bytesRead < StateObject.bufferSize || bytesRead == 0) {
 			state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
@@ -187,7 +242,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 		}
 		
 		client.BeginReceive(state.buffer, 0, StateObject.bufferSize, 0, new AsyncCallback(receiveCallback), state);
-         * */
 	}
+    */
 
 }

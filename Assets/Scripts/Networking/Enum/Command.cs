@@ -2,6 +2,7 @@
 public enum Command {
 	Register,
 	PuzzleFinished,
+    GameStart,
 	Ready,
 	Pause,
 	QrCodeSend,
@@ -49,7 +50,8 @@ static class CommandMethods
                 return "CREATE_PUZZLE";
             case Command.CreatePuzzlePart:
                 return "CREATE_PUZZLE_PART";
-                
+            case Command.GameStart:
+                return "GAME_START";
             default:
                 return "UNKNOWN COMMAND";
         }
@@ -102,6 +104,10 @@ static class CommandMethods
         else if (commandString.Equals("CREATE_PUZZLE_PART"))
         {
             return Command.CreatePuzzlePart;
+        }
+        else if (commandString.Equals("GAME_START"))
+        {
+            return Command.GameStart;
         }
         else
         {
