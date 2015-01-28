@@ -345,6 +345,17 @@ public class GameControllerScript : MonoBehaviour {
 			}
 		}
 
+        foreach (GameObject tile in puzzlePieces2)
+        {
+            TileController tileC = tile.GetComponent<TileController>();
+
+            if (!tileC.isOnCorrectCollider())
+            {
+                puzzleOver = false;
+                return;
+            }
+        }
+
 		Debug.Log ("PUZZLE DONE");
 
 		foreach(GameObject tile in puzzlePieces1) {
