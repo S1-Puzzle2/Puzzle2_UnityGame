@@ -14,15 +14,15 @@ public class CC : MonoBehaviour
     int index = 0;
     int pixelWidth;
     int pixelHeight;
-    int segmentsX = 64;
-    int segmentsY = 48;
+    int segmentsX = 40;//64*2;
+    int segmentsY = 40;//48*2;
     int[,] segments;
     int XpixelInSegment;
     int YpixelInSegment;
     int max1X, max2X;
     int max1Y, max2Y;
     int max1Val, max2Val;
-    int middle;
+    int middle, yMiddle;
     
     Vector2 player1;
     Vector2 player2;
@@ -38,10 +38,19 @@ public class CC : MonoBehaviour
     int minimalLumaMatrix = 10;
     bool initialized = false;
     bool called = false;
+    float XFactor; 
+    float YFactor;
+    public GameObject gameField;
+    Vector3 _gameField;
+    public bool searchForGamefield = false;
+
+    float posXp1, posYp1, posXp2, posYp2;
+
 
     // Use this for initialization
     void Start()
     {
+
     }
 
     void Awake()
@@ -49,6 +58,7 @@ public class CC : MonoBehaviour
 
         wb = new WebCamTexture("Microsoft LifeCam HD-3000");
         wb.Play();
+        
 
     }
 
@@ -96,8 +106,6 @@ public class CC : MonoBehaviour
 
             mapSphere();
 
-          
-
             if (difference != null && playDifference)
             {
 
@@ -113,113 +121,141 @@ public class CC : MonoBehaviour
             if(!called)
                 StartCoroutine(initGameField());
             
+            //initGameField();
+            
         }
     }
 
     private IEnumerator initGameField()
     {
         called = true;
+        yield return new WaitForSeconds(0.5f);
+        init(); 
 
-        yield return new WaitForSeconds(2);
-        init();
-        Color32[] pic = wb.GetPixels32();
-        int line, yPos, xPos;
-        double dLine;
-        LinkedList<int> borderX = new LinkedList<int>();
-        LinkedList<int> borderY = new LinkedList<int>();
-
-        for (int i = 0; i < pic.Length; i++)
+        if (searchForGamefield)
         {
-            if (pic[i].r > borderColor.r)
+            
+            Color32[] pic = wb.GetPixels32();
+            int line, yPos, xPos;
+            double dLine;
+            LinkedList<int> borderX = new LinkedList<int>();
+            LinkedList<int> borderY = new LinkedList<int>();
+
+            for (int i = 0; i < pic.Length; i++)
             {
-                line = i / pixelWidth;
-                dLine = (double)i / pixelWidth;
-                yPos = line / YpixelInSegment;
-                xPos = (int)((dLine - line) * pixelWidth / XpixelInSegment);
-                
-                if(!borderX.Contains(xPos))
-                    borderX.AddLast(xPos);
+                if (pic[i].r > borderColor.r)
+                {
+                    line = i / pixelWidth;
+                    dLine = (double)i / pixelWidth;
+                    yPos = line / YpixelInSegment;
+                    xPos = (int)((dLine - line) * pixelWidth / XpixelInSegment);
 
-                if(!borderY.Contains(yPos))
-                    borderY.AddLast(yPos);
+                    if (!borderX.Contains(xPos))
+                        borderX.AddLast(xPos);
 
+                    if (!borderY.Contains(yPos))
+                        borderY.AddLast(yPos);
+
+                }
+            }
+
+            //int minRow, maxRow, minColumn, maxColumn;
+            bool first = true;
+            int temp;
+            for (int i = 0; i < borderX.Count; i++)
+            {
+                if (first)
+                {
+                    minColumn = borderX.ElementAt(i);
+                    maxColumn = minColumn;
+                    first = false;
+                }
+                else
+                {
+                    temp = borderX.ElementAt(i);
+                    if (temp < minColumn)
+                    {
+                        minColumn = temp;
+                    }
+                    else if (temp > maxColumn)
+                    {
+                        maxColumn = temp;
+                    }
+                }
+            }
+            first = true;
+            for (int i = 0; i < borderY.Count; i++)
+            {
+                if (first)
+                {
+                    minRow = borderY.ElementAt(i);
+                    maxRow = minRow;
+                    first = false;
+                }
+                else
+                {
+                    temp = borderY.ElementAt(i);
+                    if (temp < minRow)
+                    {
+                        minRow = temp;
+                    }
+                    else if (temp > maxRow)
+                    {
+                        maxRow = temp;
+                    }
+                }
             }
         }
-
-        //int minRow, maxRow, minColumn, maxColumn;
-        bool first = true;
-        int temp;
-        for (int i = 0; i < borderX.Count; i++)
+        else
         {
-
-
-            if (first)
-            {
-                minColumn = borderX.ElementAt(i);
-                maxColumn = minColumn;
-                first = false;
-            }
-            else
-            {
-                temp = borderX.ElementAt(i);
-                if (temp < minColumn)
-                {
-                    minColumn = temp;
-                }
-                else if (temp > maxColumn)
-                {
-                    maxColumn = temp;
-                }
-            }  
+            minColumn = 0;
+            maxColumn = segmentsX;
+            minRow = 0;
+            maxRow = segmentsY;
         }
-        first = true;
-        for (int i = 0; i < borderY.Count; i++)
-        {
-            if (first)
-            {
-                minRow = borderY.ElementAt(i);
-                maxRow = minRow;
-                first = false;
-            }
-            else
-            {
-                temp = borderY.ElementAt(i);
-                if (temp < minRow)
-                {
-                    minRow = temp;
-                }
-                else if (temp > maxRow)
-                {
-                    maxRow = temp;
-                }
-            }
-        }
-
         middle = minColumn + (maxColumn - minColumn) / 2;
+        yMiddle = minRow + (maxRow - minRow) / 2;
+        posXp1 =  _gameField.x / (maxColumn - minColumn);
+        posYp1 =  _gameField.y / (maxRow - minRow);
+        posXp2 = -((_gameField.x) / 2);
+        posYp2 = -((_gameField.y) / 2);
         //Debug.Log("minRow: " + minRow +"\nmaxRow: " + maxRow + "\nminCol: " + minColumn + "\nmaxCol: " + maxColumn);
         initialized = true;
-
+    
     }
 
     private void mapSphere()
     {
+
+        
         float sphere1X, sphere1Y,sphere2X, sphere2Y;
-        //return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-        sphere1X = (player1.x - minColumn) * (Screen.width) / ((maxColumn - minColumn));
-        sphere1Y = (player1.y - minRow) * (Screen.height) / (maxColumn - minRow);
+        
 
-        sphere2X = (player2.x - minColumn) * (Screen.width) / ((maxColumn - minColumn));
-        sphere2Y = (player2.y - minRow) * (Screen.height) / (maxRow - minRow);
 
+        sphere1X = posXp2 + player1.x * posXp1;
+        sphere1Y = posYp2 + player1.y * posYp1;
+        sphere2X = posXp2 + player2.x * posXp1;
+        sphere2Y = posYp2 + player2.y * posYp1;
+
+       // Debug.Log(player1.x + "/" + player1.y + "   |||||   " + sphere1X + "/" + sphere1Y);
+        
+        /*
+        sphere1X = (player1.x - minRow) * (Screen.width) / ((maxRow - minRow));
+        sphere1Y = (player1.y -minColumn) * (Screen.height) / (maxColumn - minColumn);
+
+        sphere2X = (player2.x - minRow) * (Screen.width) / (maxRow - minRow);
+        sphere2Y = (player2.y - minColumn) * (Screen.height) / (maxColumn - minColumn);
+        */
         Vector3 pos1 = new Vector3(sphere1X, sphere1Y, 0.0f);
-        Vector3 worldPos1 = Camera.main.ScreenToWorldPoint(pos1);
+        //Vector3 worldPos1 = Camera.main.ScreenToWorldPoint(pos1);
         Vector3 pos2 = new Vector3(sphere2X, sphere2Y, 0.0f);
-        Vector3 worldPos2 = Camera.main.ScreenToWorldPoint(pos2);
-        worldPos1.z = 0.0f;
-        worldPos2.z = 0.0f;
+        //Vector3 worldPos2 = Camera.main.ScreenToWorldPoint(pos2);
+       
+        //worldPos1.z = 0.0f;
+        //worldPos2.z = 0.0f;
 
-        sphere1.transform.position = Vector3.Lerp(sphere1.transform.position, worldPos1, Time.deltaTime*4);
-        sphere2.transform.position = Vector3.Lerp(sphere2.transform.position, worldPos2, Time.deltaTime*4);
+        sphere1.transform.position = Vector3.Lerp(sphere1.transform.position, pos1, Time.deltaTime*2);
+        sphere2.transform.position = Vector3.Lerp(sphere2.transform.position, pos2, Time.deltaTime*2);
         
 
     }
@@ -232,15 +268,18 @@ public class CC : MonoBehaviour
         YpixelInSegment = pixelHeight / segmentsY;
         minimalLumaMatrix = (XpixelInSegment * YpixelInSegment) * MinimumLuma;
         segments = new int[segmentsX, segmentsY];
+        _gameField = gameField.renderer.bounds.size;
        
     }
 
     private void calcMaxPos2()
     {
-        Debug.Log("minCol: " + minColumn + " / middle: " + middle + " / max: " + maxColumn);
+        //Debug.Log("minCol: " + minColumn + " / middle: " + middle + " / max: " + maxColumn);
+        //Debug.Log("minRow: " + minRow + " / middle:" + yMiddle + " / max: " + maxRow);
        player1 = calcMaxPos(minColumn, middle, 1);
        player2 = calcMaxPos(middle, maxColumn, 2);
     }
+
 
     private Vector2 calcMaxPos(int minimalColumn,int maximalColumn, int player)
     {
@@ -277,11 +316,12 @@ public class CC : MonoBehaviour
 
         if (player == 1)
         {
-            return new Vector2(max1X, max1Y);
+           // return new Vector3(31, 0);
+           return new Vector2(max1X-minColumn, max1Y-minRow);
         }
         else 
         {
-            return new Vector2(max2X, max2Y);
+            return new Vector2(max2X-minColumn, max2Y-minRow);
         }
 
         return new Vector2(0,0);
@@ -356,8 +396,7 @@ public class CC : MonoBehaviour
                 pic[i].b = (Mathf.Abs(pic[i].b - diffPic[i].b) < diff ? (byte)0 : (byte)Mathf.Abs(pic[i].b - diffPic[i].b));
             }
 
-            diffPic = (Color32[])color32.Clone();
-            Debug.Log(index);
+            diffPic = (Color32[])color32.Clone(); 
         }
         return pic;
     }

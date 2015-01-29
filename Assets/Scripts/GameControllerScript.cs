@@ -6,6 +6,7 @@ using ZXing;
 using System.Collections.Generic;
 using ZXing.QrCode;
 using System.IO;
+using UnityEngine.UI;
 
 public class GameControllerScript : MonoBehaviour {
 
@@ -15,6 +16,7 @@ public class GameControllerScript : MonoBehaviour {
 	public float snapDistance;
     public NetworkController networkController;
     public GameObject uiController;
+    public Text winText;
 
     public QRCodePanel qrCodePanel;
 
@@ -35,6 +37,8 @@ public class GameControllerScript : MonoBehaviour {
     private string team2_clientID;
     private string team1_qrCode;
     private string team2_qrCode;
+    private string team1_name;
+    private string team2_name;
     private int imageCount;
     private int team1_images_received;
 
@@ -44,6 +48,10 @@ public class GameControllerScript : MonoBehaviour {
 
     private Texture2D[] orderPuzzleImages;
     private LinkedList<JsonData> receivedData;
+    private Dictionary<int, GameObject> puzzleGOs1;
+    private Dictionary<int, GameObject> puzzleGOs2;
+    private int[] orderIDMapping;
+
     string log = "";
 
     public bool paused = false;
@@ -53,17 +61,22 @@ public class GameControllerScript : MonoBehaviour {
 
         started = false;
 		puzzleOver = false;
+        winText.gameObject.SetActive(false);
 
 		time_Team1 = 0.0f;
 		time_Team2 = 0.0f;
-
+        
         qrWriter = new BarcodeWriter { Format = BarcodeFormat.QR_CODE, Options = new QrCodeEncodingOptions { Height = 256, Width = 256 } };
         qrCodePanel.disablePanel();
         registeredCount = 0;
 
         receivedData = new LinkedList<JsonData>();
         orderPuzzleImages = new Texture2D[9];
+        orderIDMapping = new int[9];
+        puzzleGOs1 = new Dictionary<int, GameObject>();
+        puzzleGOs2 = new Dictionary<int, GameObject>();
         //startGame();
+        
 	}
 
     public void startGame()
@@ -94,12 +107,14 @@ public class GameControllerScript : MonoBehaviour {
                     {
                         puzzlePieces1[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders[i]);
                     }
+
+                    puzzlePieces1[i].SetActive(false);
+                    puzzleGOs1.Add(orderIDMapping[i], puzzlePieces1[i]);
                 }
 
                 puzzlePieces2 = new GameObject[orderPuzzleImages.Length];
                 for (int i = 0; i < orderPuzzleImages.Length; i++)
                 {
-
                     Vector3 createdPos = new Vector3(Random.Range(boundaries2.minX, boundaries2.maxX), Random.Range(boundaries2.minY, boundaries2.maxY), 0.0f);
                     puzzlePieces2[i] = Instantiate(puzzlePiecePrefab, createdPos, Quaternion.identity) as GameObject;
                     puzzlePieces2[i].GetComponent<SpriteRenderer>().sprite = Sprite.Create(orderPuzzleImages[i], new Rect(0, 0, orderPuzzleImages[i].width, orderPuzzleImages[i].height), new Vector2(0.5f, 0.5f));
@@ -109,6 +124,10 @@ public class GameControllerScript : MonoBehaviour {
                     {
                         puzzlePieces2[i].GetComponent<TileController>().setSolutionGridCollider(gridColliders2[i]);
                     }
+
+                    puzzlePieces2[i].SetActive(false);
+                    puzzleGOs2.Add(orderIDMapping[i], puzzlePieces2[i]);
+
                 }
 
 
@@ -182,7 +201,10 @@ public class GameControllerScript : MonoBehaviour {
                 case Command.GameStateResponse:
                     // TODO: save puzzle pieces etc.
 
-                    gameStateCount++;
+                    if (appMsg["msgData"]["gameName"] != null)
+                    {
+                        gameStateCount++;
+                    }
 
                     string usedClientID = "";
                     string teamName = appMsg["msgData"]["teamName"].ToString();
@@ -191,11 +213,15 @@ public class GameControllerScript : MonoBehaviour {
                     {
                         usedClientID = team1_clientID;
                         uiController.GetComponent<UIController>().setTeam1Name(teamName);
+                        qrCodePanel.setTeam1Name(teamName);
+                        team1_name = teamName;
                     }
                     else if (gameStateCount == 2)
                     {
                         usedClientID = team2_clientID;
                         uiController.GetComponent<UIController>().setTeam2Name(teamName);
+                        qrCodePanel.setTeam2Name(teamName);
+                        team2_name = teamName;
                     }
 
                     JsonData imageIDs = appMsg["msgData"]["imageIDs"];
@@ -230,6 +256,8 @@ public class GameControllerScript : MonoBehaviour {
                         int imageID = int.Parse(appMsg["msgData"]["imageID"].ToString());
                         int order = int.Parse(appMsg["msgData"]["order"].ToString());
 
+                        orderIDMapping[order] = imageID;
+
                         log += base64 + "\r\n\r\n";
                         
                         File.WriteAllText("C:\\Users\\faisstm\\Desktop\\log.txt", log);
@@ -262,20 +290,60 @@ public class GameControllerScript : MonoBehaviour {
                 case Command.GameStart:
                     Debug.Log("GAME START YEEEEEEEEEEEEEEEEEEEEEAAAAAH!");
                     qrCodePanel.disablePanel();
-                    startGame();
+
+                    if (!started)
+                    {
+                        startGame();
+                    }
                     break;
                 case Command.Pause:
                     Time.timeScale = 0;
+                    qrCodePanel.enablePanel();
                     paused = true;
                     break;
                 case Command.Ready:
                     
                     break;
+                case Command.GameFinished:
+
+                    winText.gameObject.SetActive(true);
+                    if (appMsg["clientID"].ToString() == team1_clientID)
+                    {
+                        if(bool.Parse(appMsg["msgData"]["isWinning"].ToString())) {
+                            winText.text = team1_name + " have won!! YEAH!";                            
+                        }
+                        else
+                        {
+                            winText.text = team2_name + " have won!! YIPPIIII!";
+                        }
+                    }
+                    
+                    
+
+                    break;
                 case Command.PenaltyTimeAdd:
-                    //TODO: write
+
+                    if (appMsg["clientID"].ToString() == team1_clientID)
+                    {
+                        addToTime(1, float.Parse(appMsg["msgData"]["penaltyTime"].ToString()));
+                    } else if(appMsg["clientID"].ToString() == team2_clientID) {
+                        addToTime(2, float.Parse(appMsg["msgData"]["penaltyTime"].ToString()));
+                    }
+
                     break;
                 case Command.PieceScanned:
-                    //TODO: write
+                    int pieceID = 0;
+                    if (appMsg["clientID"].ToString() == team1_clientID)
+                    {
+                        pieceID = int.Parse(appMsg["msgData"]["unlockedImage"].ToString());
+                        puzzleGOs1[pieceID].SetActive(true);
+                    }
+                    else if (appMsg["clientID"].ToString() == team2_clientID)
+                    {
+                        pieceID = int.Parse(appMsg["msgData"]["unlockedImage"].ToString());
+                        puzzleGOs2[pieceID].SetActive(true);
+                    }
+
                     break;
             }
 
@@ -336,33 +404,50 @@ public class GameControllerScript : MonoBehaviour {
 
 	public void checkIfPuzzleFinished() {
 
+        bool temp1 = true;
 		foreach (GameObject tile in puzzlePieces1) {
 			TileController tileC = tile.GetComponent<TileController> ();
 
 			if (!tileC.isOnCorrectCollider ()) {
-				puzzleOver = false;
-				return;
+                temp1 = false;
+                break;
 			}
 		}
 
+        bool temp2 = true;
         foreach (GameObject tile in puzzlePieces2)
         {
             TileController tileC = tile.GetComponent<TileController>();
 
             if (!tileC.isOnCorrectCollider())
             {
-                puzzleOver = false;
-                return;
+                temp2 = false;
+                break;
             }
         }
 
-		Debug.Log ("PUZZLE DONE");
+        if (temp1 || temp2)
+        {
+            Debug.Log("PUZZLE DONE");
 
-		foreach(GameObject tile in puzzlePieces1) {
-			tile.GetComponent<TileController>().enabled = false;
-		}
+            foreach (GameObject tile in puzzlePieces1)
+            {
+                tile.GetComponent<TileController>().enabled = false;
+            }
 
-		puzzleOver = true;
+            SimpleParameterTransferObject puzzleFinishedPackage;
+            if (temp1)
+            {
+                puzzleFinishedPackage = new SimpleParameterTransferObject(Command.PuzzleFinished, team1_clientID, null);
+            }
+            else
+            {
+                puzzleFinishedPackage = new SimpleParameterTransferObject(Command.PuzzleFinished, team2_clientID, null);
+            }
+            networkController.sendConn(puzzleFinishedPackage);
+
+            puzzleOver = true;
+        }
 	}
 
 	public bool getPuzzleOver() {

@@ -7,6 +7,9 @@ public class QRCodePanel : MonoBehaviour {
     public RawImage qr1Raw;
     public RawImage qr2Raw;
 
+    public Text team1_name;
+    public Text team2_name;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -39,5 +42,13 @@ public class QRCodePanel : MonoBehaviour {
     public void disablePanel()
     {
         this.gameObject.SetActive(false);
+    }
+
+    public void setTeam1Name(string name) {
+        team1_name.text = name;
+    }
+
+    public void setTeam2Name(string name) {
+        team2_name.text = name;
     }
 }

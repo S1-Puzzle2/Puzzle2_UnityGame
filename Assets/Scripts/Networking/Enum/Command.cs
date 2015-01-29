@@ -17,7 +17,8 @@ public enum Command {
     MalformedCommand,
     Registered,
     CreatePuzzle,
-    CreatePuzzlePart
+    CreatePuzzlePart,
+    GameFinished
 }
 
 static class CommandMethods
@@ -52,6 +53,12 @@ static class CommandMethods
                 return "CREATE_PUZZLE_PART";
             case Command.GameStart:
                 return "GAME_START";
+            case Command.PieceScanned:
+                return "PART_UNLOCKED";
+            case Command.PuzzleFinished:
+                return "PUZZLE_FINISHED";
+            case Command.GameFinished:
+                return "GAME_FINISHED";
             default:
                 return "UNKNOWN COMMAND";
         }
@@ -108,6 +115,18 @@ static class CommandMethods
         else if (commandString.Equals("GAME_START"))
         {
             return Command.GameStart;
+        }
+        else if (commandString.Equals("PART_UNLOCKED"))
+        {
+            return Command.PieceScanned;
+        }
+        else if (commandString.Equals("PUZZLE_FINISHED"))
+        {
+            return Command.PuzzleFinished;
+        }
+        else if (commandString.Equals("GAME_FINISHED"))
+        {
+            return Command.GameFinished;
         }
         else
         {
