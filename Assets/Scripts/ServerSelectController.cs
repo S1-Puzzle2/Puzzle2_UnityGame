@@ -36,7 +36,7 @@ public class ServerSelectController : MonoBehaviour {
 
     public void connect()
     {
-        string ip = ipInput.text.text;
+        string ip = ipInput.text;
         this.gameObject.SetActive(false);
 
         networkController.ip = ip;

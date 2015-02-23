@@ -19,6 +19,7 @@ public class GameControllerScript : MonoBehaviour {
     public Text winText;
 
     public QRCodePanel qrCodePanel;
+    public GameObject testPiece;
 
 	private GameObject[] puzzlePieces1;
     private GameObject[] puzzlePieces2;
@@ -53,6 +54,7 @@ public class GameControllerScript : MonoBehaviour {
     private int[] orderIDMapping;
 
     string log = "";
+    private bool leftHandLifted;
 
     public bool paused = false;
     
@@ -76,8 +78,21 @@ public class GameControllerScript : MonoBehaviour {
         puzzleGOs1 = new Dictionary<int, GameObject>();
         puzzleGOs2 = new Dictionary<int, GameObject>();
         //startGame();
+        asdf();
         
 	}
+
+    public void asdf()
+    {
+        gridColliders = GameObject.FindGameObjectsWithTag("GridCollider").OrderBy(go => go.name).ToArray();
+        gridColliders2 = GameObject.FindGameObjectsWithTag("GridCollider2").OrderBy(go => go.name).ToArray();
+
+        testPiece.GetComponent<TileController>().setSolutionGridCollider(gridColliders[0]);
+        puzzlePieces1 = new GameObject[1];
+        puzzlePieces1[0] = testPiece;
+
+        puzzlePieces2 = new GameObject[0];
+    }
 
     public void startGame()
     {
@@ -290,6 +305,7 @@ public class GameControllerScript : MonoBehaviour {
                 case Command.GameStart:
                     Debug.Log("GAME START YEEEEEEEEEEEEEEEEEEEEEAAAAAH!");
                     qrCodePanel.disablePanel();
+                    Time.timeScale = 1;
 
                     if (!started)
                     {
@@ -478,5 +494,13 @@ public class GameControllerScript : MonoBehaviour {
         receivedData.AddLast(data);
     }
 
+    public void setLeftHandLiftet(bool value)
+    {
+        this.leftHandLifted = value;
+    }
 
+    public bool isLeftHandLiftet()
+    {
+        return this.leftHandLifted;
+    }
 }
