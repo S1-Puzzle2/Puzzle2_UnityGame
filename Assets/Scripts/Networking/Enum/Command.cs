@@ -18,7 +18,10 @@ public enum Command {
     Registered,
     CreatePuzzle,
     CreatePuzzlePart,
-    GameFinished
+    GameFinished,
+    CheckPuzzleFinished,
+    RegisterGameStatusListener,
+    GameStatusChanged
 }
 
 static class CommandMethods
@@ -30,19 +33,19 @@ static class CommandMethods
             case Command.Register:
                 return "REGISTER";
             case Command.Pause:
-                return "PAUSE";
+                return "GAME_PAUSED";
             case Command.Ready:
                 return "READY";
             case Command.GetGameState:
-                return "GET_GAME_STATE";
+                return "GET_GAME_INFO";
             case Command.GameStateResponse:
-                return "GAME_STATE_RESPONSE";
+                return "GAME_INFO";
             case Command.MalformedCommand:
                 return "MALFORMED_COMMAND";
             case Command.GetImage:
-                return "GET_IMAGE";
+                return "GET_PUZZLE_PART";
             case Command.GetImageResponse:
-                return "IMAGE";
+                return "PUZZLE_PART";
             case Command.Registered:
                 return "REGISTERED";
             case Command.QrCodeSend:
@@ -59,6 +62,12 @@ static class CommandMethods
                 return "PUZZLE_FINISHED";
             case Command.GameFinished:
                 return "GAME_FINISHED";
+            case Command.CheckPuzzleFinished:
+                return "CHECK_PUZZLE_FINISHED";
+            case Command.RegisterGameStatusListener:
+                return "REGISTER_GAME_STATUS_LISTENER";
+            case Command.GameStatusChanged:
+                return "GAME_STATUS_CHANGED";
             default:
                 return "UNKNOWN COMMAND";
         }
@@ -70,18 +79,18 @@ static class CommandMethods
         {
             return Command.Register;
         }
-        else if (commandString.Equals("PAUSE"))
+        else if (commandString.Equals("GAME_PAUSED"))
         {
             return Command.Pause;
         } else if(commandString.Equals("READY")) 
         {
             return Command.Ready;
         }
-        else if (commandString.Equals("GET_GAME_STATE"))
+        else if (commandString.Equals("GET_GAME_INFO"))
         {
             return Command.GetGameState;
         } 
-        else if(commandString.Equals("GAME_STATE")) 
+        else if(commandString.Equals("GAME_INFO")) 
         {
             return Command.GameStateResponse;
         }
@@ -97,10 +106,10 @@ static class CommandMethods
         {
             return Command.QrCodeSend;
         } 
-        else if(commandString.Equals("GET_IMAGE")) {
+        else if(commandString.Equals("GET_PUZZLE_PART")) {
             return Command.GetImage;
         }
-        else if (commandString.Equals("IMAGE"))
+        else if (commandString.Equals("PUZZLE_PART"))
         {
             return Command.GetImageResponse;
         }
@@ -127,6 +136,18 @@ static class CommandMethods
         else if (commandString.Equals("GAME_FINISHED"))
         {
             return Command.GameFinished;
+        }
+        else if (commandString.Equals("CHECK_PUZZLE_FINISHED"))
+        {
+            return Command.CheckPuzzleFinished;
+        }
+        else if (commandString.Equals("REGISTER_GAME_STATUS_LISTENER"))
+        {
+            return Command.RegisterGameStatusListener;
+        }
+        else if (commandString.Equals("GAME_STATUS_CHANGED"))
+        {
+            return Command.GameStatusChanged;
         }
         else
         {

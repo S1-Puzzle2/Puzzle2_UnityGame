@@ -4,12 +4,12 @@ C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\LitJson.dll
 C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\UnityEditor.dll
 C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\UnityEngine.dll
 C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\UnityEngine.UI.dll
+C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\zxing.unity.dll
 C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\UnityEngine.xml
 C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\UnityEditor.xml
 C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\UnityEngine.UI.xml
+C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\zxing.unity.pdb
+C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\zxing.unity.xml
 C:\Users\faisstm\Documents\Puzzle2\obj\Debug\UnityVS.Puzzle2.CSharp.csprojResolveAssemblyReference.cache
 C:\Users\faisstm\Documents\Puzzle2\obj\Debug\Assembly-CSharp.dll
 C:\Users\faisstm\Documents\Puzzle2\obj\Debug\Assembly-CSharp.pdb
-C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\zxing.unity.dll
-C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\zxing.unity.pdb
-C:\Users\faisstm\Documents\Puzzle2\Temp\UnityVS_bin\Debug\zxing.unity.xml

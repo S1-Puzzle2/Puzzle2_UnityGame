@@ -63,7 +63,7 @@ public class WLANConnection : ConnectionDelegates, IConnection {
 			Sent += callback;
 			String jsonString = obj.toJson() + "\n";
 			byte[] jsonBA = Encoding.UTF8.GetBytes(jsonString);
-			Debug.Log(jsonString);
+			//Debug.Log(jsonString);
 			socket.BeginSend(jsonBA, 0, jsonBA.Length, SocketFlags.None, new AsyncCallback(SendCallback), socket);
 		}
 	}

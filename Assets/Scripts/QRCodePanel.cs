@@ -51,4 +51,14 @@ public class QRCodePanel : MonoBehaviour {
     public void setTeam2Name(string name) {
         team2_name.text = name;
     }
+
+    public void enableQRCode1(bool value)
+    {
+        this.qr1Raw.enabled = value;
+    }
+
+    public void enableQRCode2(bool value)
+    {
+        this.qr2Raw.enabled = value;
+    }
 }

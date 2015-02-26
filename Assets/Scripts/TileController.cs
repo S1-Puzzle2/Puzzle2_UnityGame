@@ -4,11 +4,14 @@ using System.Collections;
 public class TileController : MonoBehaviour {
 
 	public float lag;
+    public Material notSelected;
+    public Material selected;
 
 	GameControllerScript gameController;
 	bool isDraged;
 	GameObject solutionGridCollider;
 	GameObject currentGridCollider;
+    private int imageID;
 
     private bool triggered;
     private Vector3 triggerPos;
@@ -19,6 +22,7 @@ public class TileController : MonoBehaviour {
 		gameController = GameObject.FindGameObjectWithTag ("GameController").GetComponent<GameControllerScript> ();
 		isDraged = false;
         triggered = false;
+        this.renderer.material = notSelected;
 	}
 	
 	// Update is called once per frame
@@ -32,9 +36,9 @@ public class TileController : MonoBehaviour {
 
         if (triggered)
         {
-            Debug.Log("is triggered");
+            //Debug.Log("is triggered, " + isDraged + " / " + gameController.isLeftHandLiftet());
             if(!isDraged && gameController.isLeftHandLiftet()) {
-                Debug.Log("move tile start");
+                //Debug.Log("move tile start");
                 moveTileStart();
             }
 
@@ -53,6 +57,7 @@ public class TileController : MonoBehaviour {
 			if (hitGameObject == this.gameObject) {
 				isDraged = true;
 				gameController.setHigherSortOrder (this.gameObject);
+                this.renderer.material = selected;
 
 				if(currentGridCollider != null) {
 					currentGridCollider.GetComponent<GridColliderController> ().setCurrentTile (null);
@@ -60,11 +65,12 @@ public class TileController : MonoBehaviour {
 				}
 			} else {
 				TileController otherC = hitGameObject.GetComponent<TileController> ();
-                Debug.Log("And the bitch is: " + hitGameObject.name);
+                //Debug.Log("And the bitch is: " + hitGameObject.name);
 
 				otherC.setDragged (true);
 				gameController.setHigherSortOrder (hitGameObject);
-				
+                otherC.renderer.material = selected;
+
 				if(otherC.currentGridCollider != null) {
 					otherC.currentGridCollider.GetComponent<GridColliderController> ().setCurrentTile (null);
 					otherC.currentGridCollider = null;
@@ -79,8 +85,10 @@ public class TileController : MonoBehaviour {
 		if (hitGameObject != null) {
 			if (hitGameObject == this.gameObject) {
 				isDraged = false;
+                this.renderer.material = notSelected;
 				setCurrentGridCollider(gameController.snapToNextGridCollider(this.gameObject));
 			} else {
+                hitGameObject.renderer.material = notSelected;
 				hitGameObject.GetComponent<TileController>().setDragged (false);
 				hitGameObject.GetComponent<TileController>().setCurrentGridCollider(gameController.snapToNextGridCollider(hitGameObject));
 			}
@@ -127,6 +135,28 @@ public class TileController : MonoBehaviour {
 			audio.Play();
 		}
 	}
+
+    public bool isOnAnyCollider()
+    {
+        if (this.currentGridCollider != null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void setImageID(int imageID)
+    {
+        this.imageID = imageID;
+    }
+
+    public int getImageID()
+    {
+        return this.imageID;
+    }
 
     void OnTriggerEnter2D(Collider2D other)
     {

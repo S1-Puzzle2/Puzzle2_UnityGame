@@ -9,6 +9,9 @@ public class KinectOverlayer : MonoBehaviour
 //	public Vector3 BottomRight;
 //	public Vector3 BottomLeft;
 
+    public NetworkController networkController;
+
+
 	public GUITexture backgroundImage;
 	public KinectWrapper.NuiSkeletonPositionIndex TrackedJoint = KinectWrapper.NuiSkeletonPositionIndex.HandRight;
 	public GameObject OverlayObject;
@@ -34,10 +37,16 @@ public class KinectOverlayer : MonoBehaviour
 
     private KinectManager manager;
 
+    private bool startCalibrating;
+    private bool readySent;
+
+    private string team1_id;
+    private string team2_id;
+
 	void Start()
 	{
-        Debug.Log(player1PlayArea.collider.bounds.min.x + " / " + player1PlayArea.collider.bounds.max.x);
-        Debug.Log(player2PlayArea.collider.bounds.min.x + " / " + player2PlayArea.collider.bounds.max.x);
+        //Debug.Log(player1PlayArea.collider.bounds.min.x + " / " + player1PlayArea.collider.bounds.max.x);
+        //Debug.Log(player2PlayArea.collider.bounds.min.x + " / " + player2PlayArea.collider.bounds.max.x);
         calibratedMin = false;
         calibratedMax = false;
         calibratingMinStarted = false;
@@ -48,18 +57,25 @@ public class KinectOverlayer : MonoBehaviour
         minPositionsPlayer2 = new Vector2();
         maxPositionsPlayer2 = new Vector2();
 
+        OverlayObject.renderer.sortingOrder = 70000;
+        OverlayObject2.renderer.sortingOrder = 70000;
+
         manager = KinectManager.Instance;
+        readySent = false;
+        startCalibrating = true;
 
 		if(OverlayObject)
 		{
 			distanceToCamera = (OverlayObject.transform.position - Camera.main.transform.position).magnitude;
 		}
+
+        InvokeRepeating("UpdateKinect", 0.0f, 0.01f);
 	}
 	
-	void Update() 
+	void UpdateKinect() 
 	{
 		
-		if(manager && manager.IsInitialized())
+		if(manager && manager.IsInitialized() && startCalibrating)
 		{
 			//backgroundImage.renderer.material.mainTexture = manager.GetUsersClrTex();
 			if(backgroundImage && (backgroundImage.texture == null))
@@ -72,7 +88,7 @@ public class KinectOverlayer : MonoBehaviour
 			
 			int iJointIndex = (int)TrackedJoint;
 			
-			if(manager.IsUserDetected())
+			if(manager.IsUserDetected() && manager.TwoUsers)
 			{
 				uint userId = manager.GetPlayer1ID();
                 uint userId2 = manager.GetPlayer2ID();
@@ -83,20 +99,33 @@ public class KinectOverlayer : MonoBehaviour
                     if (!calibratedMin && !calibratingMinStarted)
                     {
                         posText.text = "Calibrating min...";
-                        Debug.Log("start calibrating min");
+                        //Debug.Log("start calibrating min");
                         StartCoroutine("calibrateMin");
                     }
 
                     if (calibratedMin && !calibratedMax && !calibratingMaxStarted)
                     {
                         posText.text = "Calibrating max...";
-                        Debug.Log("start calibrating max");
+                        //Debug.Log("start calibrating max");
                         StartCoroutine("calibrateMax");
                     }
                 }
 
 				if(manager.IsJointTracked(userId, iJointIndex) && calibratedMin && calibratedMax)
 				{
+
+                    if (!readySent)
+                    {
+                        Debug.Log("sending ready");
+                        SimpleParameterTransferObject readyCommand = new SimpleParameterTransferObject(Command.Ready, team1_id, null);
+                        networkController.sendConn(readyCommand);
+
+                        SimpleParameterTransferObject readyCommand2 = new SimpleParameterTransferObject(Command.Ready, team2_id, null);
+                        networkController.sendConn(readyCommand2);
+
+                        readySent = true;
+                    }
+
 					Vector3 posJoint = manager.GetRawSkeletonJointPos(userId, iJointIndex);
                     Vector3 posJoint2 = Vector3.zero;
 
@@ -234,7 +263,7 @@ public class KinectOverlayer : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
-        Debug.Log(minX / functionEvals + " / " + minY / functionEvals);
+        //Debug.Log(minX / functionEvals + " / " + minY / functionEvals);
         minPositionsPlayer1.x = minX / functionEvals;
         minPositionsPlayer1.y = minY / functionEvals;
 
@@ -299,7 +328,7 @@ public class KinectOverlayer : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
-        Debug.Log(maxX / functionEvals + " / " + maxY / functionEvals);
+        //Debug.Log(maxX / functionEvals + " / " + maxY / functionEvals);
         maxPositionsPlayer1.x = maxX / functionEvals;
         maxPositionsPlayer1.y = maxY / functionEvals;
 
@@ -309,5 +338,20 @@ public class KinectOverlayer : MonoBehaviour
             maxPositionsPlayer2.y = maxY2 / functionEvals;
         }
         calibratedMax = true;
+    }
+
+    public void setStartCalibration(bool value)
+    {
+        this.startCalibrating = value;
+    }
+
+    public void setTeam1ID(string id)
+    {
+        this.team1_id = id;
+    }
+
+    public void setTeam2ID(string id)
+    {
+        this.team2_id = id;
     }
 }

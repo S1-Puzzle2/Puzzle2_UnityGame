@@ -13,7 +13,7 @@ public class Webcam : MonoBehaviour {
 		webcamTexture = new WebCamTexture ("Integrated Webcam");
 
 		for(int i = 0; i < WebCamTexture.devices.Length; i++) {
-			Debug.Log(WebCamTexture.devices[i].name);
+			//Debug.Log(WebCamTexture.devices[i].name);
 		}
 
 		GetComponent<MeshRenderer> ().material.mainTexture = webcamTexture;
@@ -44,7 +44,7 @@ public class Webcam : MonoBehaviour {
 			}
 		}
 		
-		Debug.Log("X: " + highestX + ", Y: " + highestY + ", Max Brightness: " + maxBrightness);
+		//Debug.Log("X: " + highestX + ", Y: " + highestY + ", Max Brightness: " + maxBrightness);
 	
 	}
 }

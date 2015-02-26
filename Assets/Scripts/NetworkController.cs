@@ -83,7 +83,7 @@ public class NetworkController : MonoBehaviour {
 
     public void sendConn(AbstractTransferObject obj)
     {
-        Debug.Log("Sent command: " + obj.msgType);
+        //Debug.Log("Sent command: " + obj.msgType);
 		connManager.send(obj, new ConnectionDelegates.SentHandler(sentCallback));
         System.Timers.Timer timer = new System.Timers.Timer(timeOutSec * 1000);
         timer.Elapsed += timer_Elapsed;
@@ -93,7 +93,7 @@ public class NetworkController : MonoBehaviour {
 
     void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
     {
-        Debug.Log("Packet timed out, resending");
+        //Debug.Log("Packet timed out, resending");
         System.Timers.Timer timer = (System.Timers.Timer)sender;
         AbstractTransferObject obj = timeOutTimers[timer];
         timeOutTimers.Remove(timer);
@@ -118,13 +118,13 @@ public class NetworkController : MonoBehaviour {
 	}
 	
 	private void sentCallback() {
-		Debug.Log("Sent message");
+		//Debug.Log("Sent message");
 	}
 	
 	private void receiveCallback(string response) {
 
         //response = response.Remove(response.Length - 1);
-        Debug.Log("received: " + response);
+        //Debug.Log("received: " + response);
         
         JsonData responseData = JsonMapper.ToObject(response);
         long crc = 0;
@@ -134,7 +134,7 @@ public class NetworkController : MonoBehaviour {
         }
         catch (Exception e)
         {
-            Debug.Log(e.Message);
+            //Debug.Log(e.Message);
         }
 
         int recSeqID = (int)responseData["seqID"];
@@ -144,7 +144,7 @@ public class NetworkController : MonoBehaviour {
 
         if (checkSumCorrect)
         {
-            Debug.Log("Checksum correct");
+            //Debug.Log("Checksum correct");
             if (allreadyReceivedSeqID.Contains(recSeqID))
             {
                 //connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
@@ -157,7 +157,7 @@ public class NetworkController : MonoBehaviour {
 
             if (responseData.Keys.Contains("appMsg"))
             {
-                Debug.Log("Received appMsg: " + Base64.Base64Decode(responseData["appMsg"].ToString()));
+                //Debug.Log("Received appMsg: " + Base64.Base64Decode(responseData["appMsg"].ToString()));
                 gameController.updateFromNetwork(responseData);
                 FlagTransferObject fto = new FlagTransferObject(true, false, recSeqID);
                 sendConn(fto);
@@ -179,7 +179,7 @@ public class NetworkController : MonoBehaviour {
         }
         else
         {
-            Debug.Log("CheckSum false");
+            //Debug.Log("CheckSum false");
             FlagTransferObject fto = new FlagTransferObject(false, false, recSeqID);
             sendConn(fto);
         }
@@ -193,7 +193,7 @@ public class NetworkController : MonoBehaviour {
         string responseWithoutChecksum = response.Remove(response.IndexOf(",\"checkSum")) + "}";
         byte[] bytes = Encoding.UTF8.GetBytes(responseWithoutChecksum);
         long crcVal = CRC32.calcCrc32(bytes);
-        Debug.Log("Got Checksum: " + crc + ", Calc crc: " + crcVal);
+        //Debug.Log("Got Checksum: " + crc + ", Calc crc: " + crcVal);
 
         if (crc == crcVal)
         {

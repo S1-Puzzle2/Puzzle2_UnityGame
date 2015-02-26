@@ -54,6 +54,17 @@ using LitJson;
                     {
                         appMsgWriter.Write((int)parameters[s]);
                     }
+                    else if(parameters[s].GetType().IsArray) {
+                        appMsgWriter.WriteArrayStart();
+                        int[] list = (int[])parameters[s];
+
+                        foreach (int i in list)
+                        {
+                            appMsgWriter.Write(i);
+                        }
+
+                        appMsgWriter.WriteArrayEnd();
+                    }
                     else
                     {
                         appMsgWriter.Write(parameters[s].ToString());

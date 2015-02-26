@@ -32,8 +32,8 @@ public class GestureListener : MonoBehaviour, KinectGestures.GestureListenerInte
 	{
 		// detect these user specific gestures
 		KinectManager manager = KinectManager.Instance;
-        GestureInfo.text = "User detected";
-        Debug.Log("Listener: User detected");
+        //GestureInfo.text = "User detected";
+        //Debug.Log("Listener: User detected");
         manager.DetectGesture(userId, KinectGestures.Gestures.Click);
 	}
 	
@@ -53,7 +53,7 @@ public class GestureListener : MonoBehaviour, KinectGestures.GestureListenerInte
         if (gesture == KinectGestures.Gestures.Click)
         {
             leftHandLift = !leftHandLift;
-            GestureInfo.text = "Push";
+            //GestureInfo.text = "Push";
             gameController.setLeftHandLiftet(leftHandLift);
         }
 
