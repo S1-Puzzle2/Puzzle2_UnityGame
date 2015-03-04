@@ -356,7 +356,7 @@ GameObject:
   - 61: {fileID: 62892468}
   m_Layer: 2
   m_Name: Player2Sphere
-  m_TagString: Untagged
+  m_TagString: Player2Sphere
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1207,6 +1207,7 @@ MonoBehaviour:
   HandCursor2: {fileID: 0}
   ControlMouseCursor: 0
   GesturesDebugText: {fileID: 0}
+  AllPlayersCalibrated: 0
 --- !u!114 &399506816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1612,7 +1613,7 @@ GameObject:
   - 61: {fileID: 520497635}
   m_Layer: 2
   m_Name: Player1Sphere
-  m_TagString: Untagged
+  m_TagString: Player1Sphere
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3512,12 +3513,12 @@ MonoBehaviour:
   boundaries1:
     minX: -8
     maxX: -3
-    minY: -6.80000019
+    minY: -4.5999999
     maxY: -4.5999999
   boundaries2:
     minX: 7.88000011
     maxX: 12.8000002
-    minY: -6.80000019
+    minY: -4.5999999
     maxY: -4.5999999
   snapDistance: 2
   networkController: {fileID: 1373957588}

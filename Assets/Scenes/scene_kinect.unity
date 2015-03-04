@@ -508,7 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d41a85c0eaa85e649aeccd75254c53b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lag: 20
+  lag: 1
   notSelected: {fileID: 10754, guid: 0000000000000000e000000000000000, type: 0}
   selected: {fileID: 2100000, guid: 586e9bb1cfa5a02428b656276407ade3, type: 2}
 --- !u!212 &107326901
@@ -3479,6 +3479,10 @@ Prefab:
     - target: {fileID: 400000, guid: 456dc094c30f0eb478d78e70f9de38bf, type: 2}
       propertyPath: m_RootOrder
       value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400000, guid: 456dc094c30f0eb478d78e70f9de38bf, type: 2}
+      propertyPath: lag
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 456dc094c30f0eb478d78e70f9de38bf, type: 2}

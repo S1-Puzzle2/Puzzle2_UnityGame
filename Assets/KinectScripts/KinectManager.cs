@@ -106,7 +106,7 @@ public class KinectManager : MonoBehaviour
 	private bool Player1Calibrated = false;
 	private bool Player2Calibrated = false;
 	
-	private bool AllPlayersCalibrated = false;
+	public bool AllPlayersCalibrated = false;
 	
 	// Values to track which ID (assigned by the Kinect) is player 1 and player 2.
 	private uint Player1ID;

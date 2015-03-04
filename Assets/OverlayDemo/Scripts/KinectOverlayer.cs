@@ -62,14 +62,14 @@ public class KinectOverlayer : MonoBehaviour
 
         manager = KinectManager.Instance;
         readySent = false;
-        startCalibrating = true;
+        startCalibrating = false;
 
 		if(OverlayObject)
 		{
 			distanceToCamera = (OverlayObject.transform.position - Camera.main.transform.position).magnitude;
 		}
 
-        InvokeRepeating("UpdateKinect", 0.0f, 0.01f);
+        InvokeRepeating("UpdateKinect", 0.0f, 0.02f);
 	}
 	
 	void UpdateKinect() 
@@ -88,7 +88,7 @@ public class KinectOverlayer : MonoBehaviour
 			
 			int iJointIndex = (int)TrackedJoint;
 			
-			if(manager.IsUserDetected() && manager.TwoUsers)
+			if(manager.IsUserDetected() && manager.TwoUsers && manager.AllPlayersCalibrated)
 			{
 				uint userId = manager.GetPlayer1ID();
                 uint userId2 = manager.GetPlayer2ID();
@@ -124,6 +124,7 @@ public class KinectOverlayer : MonoBehaviour
                         networkController.sendConn(readyCommand2);
 
                         readySent = true;
+                        posText.text = "";
                     }
 
 					Vector3 posJoint = manager.GetRawSkeletonJointPos(userId, iJointIndex);
@@ -141,7 +142,7 @@ public class KinectOverlayer : MonoBehaviour
 						
 						// depth pos to color pos
 						Vector2 posColor = manager.GetColorMapPosForDepthPos(posDepth);
-                        posText.text = posColor.ToString();
+                        //posText.text = posColor.ToString();
 						
                         
 						//float scaleX = (float)posColor.x / KinectWrapper.Constants.ColorImageWidth;
@@ -162,6 +163,26 @@ public class KinectOverlayer : MonoBehaviour
 						if(OverlayObject)
 						{
 							//Vector3 vPosOverlay = Camera.main.ViewportToWorldPoint(new Vector3(scaleX, scaleY, distanceToCamera));
+
+                            if (scaleX < player1PlayArea.collider.bounds.min.x)
+                            {
+                                scaleX = player1PlayArea.collider.bounds.min.x;
+                            }
+                            else if (scaleX > player1PlayArea.collider.bounds.max.x)
+                            {
+                                scaleX = player1PlayArea.collider.bounds.max.x;
+                            }
+
+
+                            if(scaleY < player1PlayArea.collider.bounds.min.y) 
+                            {
+                                scaleY = player1PlayArea.collider.bounds.min.y;
+                            }
+                            else if(scaleY > player1PlayArea.collider.bounds.max.y) 
+                            {
+                                scaleY = player1PlayArea.collider.bounds.max.y;
+                            }
+
                             Vector3 vPosOverlay = new Vector3(scaleX, scaleY, OverlayObject.transform.position.z);
                             OverlayObject.transform.position = Vector3.Lerp(OverlayObject.transform.position, vPosOverlay, smoothFactor * Time.deltaTime);
 						}
@@ -174,7 +195,7 @@ public class KinectOverlayer : MonoBehaviour
 
                         // depth pos to color pos
                         Vector2 posColor = manager.GetColorMapPosForDepthPos(posDepth);
-                        posText.text = posColor.ToString();
+                        //posText.text = posColor.ToString();
 
 
                         //float scaleX = (float)posColor.x / KinectWrapper.Constants.ColorImageWidth;
@@ -194,6 +215,25 @@ public class KinectOverlayer : MonoBehaviour
 
                         if (OverlayObject2)
                         {
+                            if (scaleX < player2PlayArea.collider.bounds.min.x)
+                            {
+                                scaleX = player2PlayArea.collider.bounds.min.x;
+                            }
+                            else if (scaleX > player2PlayArea.collider.bounds.max.x)
+                            {
+                                scaleX = player2PlayArea.collider.bounds.max.x;
+                            }
+
+
+                            if (scaleY < player2PlayArea.collider.bounds.min.y)
+                            {
+                                scaleY = player2PlayArea.collider.bounds.min.y;
+                            }
+                            else if (scaleY > player2PlayArea.collider.bounds.max.y)
+                            {
+                                scaleY = player2PlayArea.collider.bounds.max.y;
+                            }
+
                             //Vector3 vPosOverlay = Camera.main.ViewportToWorldPoint(new Vector3(scaleX, scaleY, distanceToCamera));
                             Vector3 vPosOverlay = new Vector3(scaleX, scaleY, OverlayObject2.transform.position.z);
                             OverlayObject2.transform.position = Vector3.Lerp(OverlayObject2.transform.position, vPosOverlay, smoothFactor * Time.deltaTime);
@@ -214,7 +254,7 @@ public class KinectOverlayer : MonoBehaviour
     private IEnumerator calibrateMin()
     {
         calibratingMinStarted = true;
-        int functionEvals = (int)(calibrationTime / 0.1);
+        int functionEvals = (int)(calibrationTime / 0.1f);
         float minX = 0.0f;
         float minY = 0.0f;
 
@@ -278,7 +318,7 @@ public class KinectOverlayer : MonoBehaviour
     private IEnumerator calibrateMax()
     {
         calibratingMaxStarted = true;
-        int functionEvals = (int)(calibrationTime / 0.1);
+        int functionEvals = (int)(calibrationTime / 0.1f);
         float maxX = 0.0f;
         float maxY = 0.0f;
 

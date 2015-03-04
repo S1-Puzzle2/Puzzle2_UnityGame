@@ -83,12 +83,16 @@ public class NetworkController : MonoBehaviour {
 
     public void sendConn(AbstractTransferObject obj)
     {
-        //Debug.Log("Sent command: " + obj.msgType);
+        Debug.Log("Sent command: " + obj.msgType);
 		connManager.send(obj, new ConnectionDelegates.SentHandler(sentCallback));
-        System.Timers.Timer timer = new System.Timers.Timer(timeOutSec * 1000);
-        timer.Elapsed += timer_Elapsed;
-        timer.Start();
-        timeOutTimers.Add(timer, obj);
+
+        if (!(obj is FlagTransferObject))
+        {
+            System.Timers.Timer timer = new System.Timers.Timer(timeOutSec * 1000);
+            timer.Elapsed += timer_Elapsed;
+            timer.Start();
+            timeOutTimers.Add(timer, obj);
+        }
 	}
 
     void timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -124,7 +128,7 @@ public class NetworkController : MonoBehaviour {
 	private void receiveCallback(string response) {
 
         //response = response.Remove(response.Length - 1);
-        //Debug.Log("received: " + response);
+        Debug.Log("received: " + response);
         
         JsonData responseData = JsonMapper.ToObject(response);
         long crc = 0;
@@ -145,19 +149,9 @@ public class NetworkController : MonoBehaviour {
         if (checkSumCorrect)
         {
             //Debug.Log("Checksum correct");
-            if (allreadyReceivedSeqID.Contains(recSeqID))
-            {
-                //connManager.receive(new ConnectionDelegates.ReceivedHandler(receiveCallback));
-                return;
-            }
-            else
-            {
-                allreadyReceivedSeqID.AddFirst(recSeqID);
-            }
-
             if (responseData.Keys.Contains("appMsg"))
             {
-                //Debug.Log("Received appMsg: " + Base64.Base64Decode(responseData["appMsg"].ToString()));
+                Debug.Log("Received appMsg: " + Base64.Base64Decode(responseData["appMsg"].ToString()));
                 gameController.updateFromNetwork(responseData);
                 FlagTransferObject fto = new FlagTransferObject(true, false, recSeqID);
                 sendConn(fto);

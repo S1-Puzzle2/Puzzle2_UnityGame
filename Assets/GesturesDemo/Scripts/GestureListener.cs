@@ -8,25 +8,40 @@ public class GestureListener : MonoBehaviour, KinectGestures.GestureListenerInte
 	// GUI Text to display the gesture messages.
 	public Text GestureInfo;
 	
-	private bool leftHandLift;
+	private bool leftHandLift1;
+    private bool leftHandLift2;
     private GameControllerScript gameController;
+    private KinectManager manager;
 
     void Start()
     {
         gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameControllerScript>();
-        leftHandLift = false;
+        leftHandLift1 = false;
+        leftHandLift2 = false;
+        manager = KinectManager.Instance;
     }
 	
-	public bool IsHandLiftet()
+	public bool IsHandLiftet1()
 	{
-        if (leftHandLift)
+        if (leftHandLift1)
 		{
-            leftHandLift = false;
+            leftHandLift1 = false;
 			return true;
 		}
 		
 		return false;
 	}
+
+    public bool IsHandLiftet2()
+    {
+        if (leftHandLift2)
+        {
+            leftHandLift2 = false;
+            return true;
+        }
+
+        return false;
+    }
 	
     public void UserDetected(uint userId, int userIndex)
 	{
@@ -50,12 +65,25 @@ public class GestureListener : MonoBehaviour, KinectGestures.GestureListenerInte
 	public bool GestureCompleted (uint userId, int userIndex, KinectGestures.Gestures gesture, 
 	                              KinectWrapper.NuiSkeletonPositionIndex joint, Vector3 screenPos)
 	{
+        
         if (gesture == KinectGestures.Gestures.Click)
         {
-            leftHandLift = !leftHandLift;
-            //GestureInfo.text = "Push";
-            gameController.setLeftHandLiftet(leftHandLift);
+
+            if (userId == manager.GetPlayer1ID())
+            {
+                leftHandLift1 = !leftHandLift1;
+                //GestureInfo.text = "Push";
+                gameController.setLeftHandLiftet1(leftHandLift1);
+            }
+
+            if (userId == manager.GetPlayer2ID())
+            {
+                leftHandLift2 = !leftHandLift2;
+                gameController.setLeftHandLiftet2(leftHandLift2);
+            }
         }
+
+        
 
 		return true;
 	}
@@ -63,8 +91,7 @@ public class GestureListener : MonoBehaviour, KinectGestures.GestureListenerInte
 	public bool GestureCancelled (uint userId, int userIndex, KinectGestures.Gestures gesture, 
 	                              KinectWrapper.NuiSkeletonPositionIndex joint)
 	{
-		// don't do anything here, just reset the gesture state
-		return true;
+        return true;
 	}
 	
 }

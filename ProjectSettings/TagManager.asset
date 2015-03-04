@@ -5,6 +5,8 @@ TagManager:
   tags:
   - GridCollider
   - GridCollider2
+  - Player1Sphere
+  - Player2Sphere
   - 
   Builtin Layer 0: Default
   Builtin Layer 1: TransparentFX

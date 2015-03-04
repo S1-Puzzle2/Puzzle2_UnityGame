@@ -54,7 +54,11 @@ public class GameControllerScript : MonoBehaviour {
     private Dictionary<int, GameObject> puzzleGOs2;
 
     string log = "";
-    private bool leftHandLifted;
+    private bool leftHandLifted1;
+    private bool leftHandLiftet2;
+
+    private bool player1Dragging;
+    private bool player2Dragging;
 
     public bool paused = false;
     
@@ -71,6 +75,9 @@ public class GameControllerScript : MonoBehaviour {
         qrWriter = new BarcodeWriter { Format = BarcodeFormat.QR_CODE, Options = new QrCodeEncodingOptions { Height = 256, Width = 256 } };
         qrCodePanel.disablePanel();
         registeredCount = 0;
+
+        player1Dragging = false;
+        player2Dragging = false;
 
         receivedData = new LinkedList<JsonData>();
         arrayIDMapping = new Dictionary<int, int>();
@@ -294,6 +301,7 @@ public class GameControllerScript : MonoBehaviour {
                         {
                             imageCount = imageIDs.Count;
                             int count = imageIDs.Count;
+                            Debug.Log(count);
                             for (int i = 0; i < count; i++)
                             {
                                 Dictionary<string, object> paramsDict = new Dictionary<string, object>();
@@ -464,7 +472,7 @@ public class GameControllerScript : MonoBehaviour {
 	public void checkIfPuzzleFinished() {
 
         bool p1AllPiecesSet = true;
-        int[] imageIDS = new int[9];
+        int[] imageIDS = new int[] {0, 0, 0};
         foreach (GameObject tile in puzzlePieces1)
         {
             TileController tileC = tile.GetComponent<TileController>();
@@ -481,7 +489,7 @@ public class GameControllerScript : MonoBehaviour {
             int i = 0;
             foreach (GameObject gridCollider in gridColliders)
             {
-                imageIDS[i] = gridCollider.GetComponent<GridColliderController>().getCurrentTile().GetComponent<TileController>().getImageID(); 
+                //imageIDS[i] = gridCollider.GetComponent<GridColliderController>().getCurrentTile().GetComponent<TileController>().getImageID(); 
             }
             sendPuzzleCheckPackage(imageIDS, team1_clientID);
         }
@@ -560,7 +568,7 @@ public class GameControllerScript : MonoBehaviour {
     private void sendPuzzleCheckPackage(int[] imageIDS, string clientID)
     {
         Dictionary<string, object> parameters = new Dictionary<string, object>();
-        parameters.Add("puzzleList", imageIDS);
+        parameters.Add("partList", imageIDS);
         SimpleParameterTransferObject package = new SimpleParameterTransferObject(Command.CheckPuzzleFinished, clientID, parameters);
         networkController.sendConn(package);
     }
@@ -593,13 +601,43 @@ public class GameControllerScript : MonoBehaviour {
         receivedData.AddLast(data);
     }
 
-    public void setLeftHandLiftet(bool value)
+    public void setLeftHandLiftet1(bool value)
     {
-        this.leftHandLifted = value;
+        this.leftHandLifted1 = value;
     }
 
-    public bool isLeftHandLiftet()
+    public bool isLeftHandLiftet1()
     {
-        return this.leftHandLifted;
+        return this.leftHandLifted1;
+    }
+
+    public void setLeftHandLiftet2(bool value)
+    {
+        this.leftHandLiftet2 = value;
+    }
+
+    public bool isLeftHAndLiftet2()
+    {
+        return this.leftHandLiftet2;
+    }
+
+    public void setPlayer1Dragging(bool value)
+    {
+        this.player1Dragging = value;
+    }
+
+    public bool getPlayer1Dragging()
+    {
+        return this.player1Dragging;
+    }
+
+    public void setPlayer2Dragging(bool value)
+    {
+        this.player2Dragging = value;
+    }
+
+    public bool getPlayer2Dragging()
+    {
+        return this.player2Dragging;
     }
 }
